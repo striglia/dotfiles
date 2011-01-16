@@ -1,6 +1,10 @@
 /*
 !.*
 
+# Ignore tmp and swap files
+*~
+*.swp
+
 .CFUserTextEncoding
 .DS_Store
 .Trash/
