@@ -1,0 +1,6 @@
+[user]
+	name = striglia
+	email = scott.triglia@gmail.com
+[core]
+	autocrlf = input
+	safecrlf = true
