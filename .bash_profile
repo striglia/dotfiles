@@ -15,7 +15,17 @@ PATH="/usr/local/git/bin:${PATH}"
 PATH="/Users/striglia/bin:${PATH}"
 export PATH
 
+# Change prompt to not be awful
 export PS1="\u@ \w$ "
+
+# Virtualenv 
+export WORKON_HOME=$HOME/virtualenvs
+source $HOME/env_ext/virtualenvwrapper.sh
+workon default
+
+# Make pip play nice with virtualenv
+export PIP_VIRTUALENV_BASE=$WORKON_HOME
+export PIP_RESPECT_VIRTUALENV=true
 
 # MacPorts Installer addition on 2010-12-15_at_20:12:38: adding an appropriate PATH variable for use with MacPorts.
 #export PATH=/opt/local/bin:/opt/local/sbin:$PATH

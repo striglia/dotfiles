@@ -14,3 +14,4 @@
 .viminfo
 .vim/tmp
 .ssh/
+.bash_history
