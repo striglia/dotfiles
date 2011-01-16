@@ -1,283 +1,3 @@
-python --version
-more easy_install
-which easy_install
-more `which easy_install`
-ls
-ls -a
-git
-cd ~
-ls
-cd /usr/local/bin
-ls
-cd /usr/local/
-ls
-cd git/
-ls
-cd ..
-ls
-echo PATH
-echo $PATH
-vim ~
-cd ~
-ls -a
-echo $PS1
-vim .bashrc
-echo $PS1
-vim .bashrc 
-echo $PS1
-vim .bashrc 
-cd Dropbox/
-ls
-cd Misc/
-ls
-cd ../CS\ Projects/dotfiles/
-ls
-ls -a
-cp .vimrc ~/.
-ls | more
-ls -a | more
-more .bash_profile
-more .bash_profile
-cp .bash_profile ~/.
-cd ~
-more .bashrc 
-rm .bashrc 
-vim .bash_profile 
-mkdir .vim
-cd .vim
-mkdir colors
-mkdir syntax
-git config --global user.name "striglia"
-git config --global user.email "scott.triglia@gmail.com"
-git config --global user.name "striglia"
-git config --global core.autocrlf input
-git config --global core.safecrlf true
-cp Downloads/git_tutorial/ Dropbox/CS\ Projects/.
-cp -r Downloads/git_tutorial/ Dropbox/CS\ Projects/.
-cd Dropbox/CS\ Projects/
-ls
-cd work/
-ls
-cd .
-mkdir Tutorials
-mv Tutorials/ tutorials
-mkdir tutorials/git
-mv html tutorials/git/
-mv -r html tutorials/git/.
-mv html tutorials/git/.
-ls
-cd ..
-mv html tutorials/git/.
-ls
-mv work/tutorials/ .
-mv html tutorials/git/.
-mv work tutorials/git/
-mv spoj/ tutorials/git/
-ls
-mv tutorials/git/spoj/ Python/
-mv repos/ tutorials/git/
-cd tutorials/git/
-ls
-mkdir workingdir
-mv workingdir/ tmpdir
-cd tmpdir/
-mkdir hello
-cd hello/
-cat "puts \"Hello, World\"" > hello.rb
-echo "puts \"Hello, World\"" > hello.rb
-ls
-more hello.rb 
-git init
-git add hello.rb 
-git commit -m 'First commit'
-git status
-vim hello.rb 
-git status
-git add hello.rb 
-git status
-echo $EDITOR
-vim ~/.bash_profile 
-echo $EDITOR
-cd Dropbox/CS\ Projects/tutorials/git/
-cd tmpdir/
-ls
-cd hello/
-ls
-echo $EDITOR
-git commit
-cd ~/Downloads/
-ls
-cd vim73/
-ls
-more README.txt.info 
-ls
-clear
-sl
-ls
-more README.txt
-more README_mac.txt 
-more README.txt
-more README_unix.txt 
-ls
-cd src
-ls
-ls
-make install
-emacs .bash_profile 
-cd Downloads/
-ls
-open xcode_3.2.5_and_ios_sdk_4.2_final.dmg 
-open .
-ls
-cd vim73/
-ls
-cd src
-python
-cd ~/Downloads/
-cd Step4/
-ls
-/usr/bin/unzip Step5.zip 
-/usr/bin/unzip Step5.zip 
-/usr/bin/unzip Step5.zip 
-/usr/bin/unzip Step5.zip 
-ls
-open Step4.txt 
-/usr/bin/unzip Step5.zip 
-open Step5.
-open Step5.txt 
-cd Downloads/vim73/src
-ls
-ls
-more README.txt 
-make install
-ls
-ls | grep readme
-ls | grep REA
-more ../README_unix.txt 
-more INSTALL
-make
-more INSTALL
-make install
-sudo make install
-cd /usr/'
-cd /Users/striglia/b
-cd /usr/local/bin/
-ls
-which vim
-cd ~
-ls
-vim .vimrc 
-vim --version
-ls
-which
-which vim
-cd /usr/bin/
-ls
-cd /usr/local/bin/
-ls
-vim --version
-./vim --version
-vim ~
-cd ~
-ls
-vim .vimrc 
-vim .bash_profile
-which vim
-vim .bash_profile
-vim
-which vim
-vim
-cd .vim
-ls
-cd colors
-mv ~/Downloads/molokai.vim.vim molokai.vim
-ls
-cd ~
-vim .vimrc 
-ls
-vim .vimrc 
-ls
-cd .vim
-ls
-clear
-unzip ~/Downloads/tpope-vim-pathogen-v1.2-0-g9dc6d06.zip .
-unzip ~/Downloads/tpope-vim-pathogen-v1.2-0-g9dc6d06.zip
-ls tpope-vim-pathogen-4750804/
-ls tpope-vim-pathogen-4750804/autoload/
-mv tpope-vim-pathogen-4750804/autoload/ .
-rmdir tpope-vim-pathogen-4750804/
-ls
-cd ../
-vim .vimrc 
-ls
-cd .vim
-ls
-mkdir bundles
-unzip ~/Downloads/taglist_45.zip 
-ls
-mkdir taglist
-mv plugin/ taglist/
-mv doc taglist/
-ls
-mv taglist/ bundles/
-vim ~.vimrc
-vim 
-vim ~.vimrc
-vim ~/.vimrc
-mkdir tmp
-ls
-vim ~/.vimrc
-vim ~/.vimrc
-ls
-cd bundles/taglist/
-l
-ls
-cd doc/
-vim
-vim
-vim 
-vim ~/.vimrc 
-cd ~/.vim
-ls
-mkdir tmp/swap
-mkdir tmp/backup
-vim
-vim ~/.vimrc 
-vim
-vim
-cd ~/Dropbox/Research/utility\ mfiles/
-vim glmEstimate.m 
-cd ~
-vim .vimrc 
-cd ~/Dropbox/Research/utility\ mfiles/
-vim glmEstimate.m 
-cd ~
-vim .vimrc 
-mkdir .vim/view
-vim .vimrc 
-vim ~/Dropbox/Research/utility\ mfiles/glmEstimate.m 
-cd Downloads/
-ls
-unzip matlab.zip 
-mv syntax/matlab.vim ~/.vim/syntax/.
-ls
-mkdir matlab
-mv compiler/ matlab
-mv doc/ matlab
-mv ftplugin/ matlab
-mv indent/ mat
-mv mat matlab
-mv matlab/mat/ matlab/indent
-ls
-rm license.txt 
-ls syntax/
-rm syntax/
-rmdir syntax/
-rm taglist_45.zip 
-rm tpope-vim-pathogen-v1.2-0-g9dc6d06.zip 
-ls
-rm -rf matlab
-unzip matlab.zip > matlab
 ls
 mv matlab.zip ../.
 rm -rf *
@@ -430,3 +150,351 @@ ls
 git checkout -b greet
 git status
 ls
+cd .vim
+ls
+cd tmp/
+ls
+cd backup/
+ls
+cd ../swap/
+ls
+cd ../../
+ls
+cd ~
+vim .vimrc 
+cd ~/Dropbox/CS\ Projects/tutorials/git/tmpdir/hello/
+rm .Rakefile.un~ 
+rm .hello.rb.un~ 
+ls
+ls -a
+git status
+rm lib/.hello.rb.un~ 
+ls
+pw
+pwd
+vim lib/greeter.rb
+git add lib/greeter.rb 
+git commit -m 'Added greeter class'
+vim lib/hello.rb 
+git add lib/hello.rb 
+git commit -m 'Hellow uses Greeter'
+ls
+vim Rakefile 
+git add Rakefile 
+git commit -m 'Updated Rakefile'
+git hist -
+git hist
+git hist -all
+git hist --all
+git checkout master
+cat lib/hello.rb 
+git checkout greet
+cat lib/hello.rb 
+git hist
+git checkout greet
+cat lib/hello.rb
+vim readme
+git checkout master
+git add readme
+git commit -m 'Added README'
+git hist -all
+git hist --all
+man git
+git status
+git checkout greet
+git merge master
+git hist --all
+git checkout master
+git add lib/hello.rb 
+git status
+vim lib/hello.rb 
+git add lib/hello.rb 
+git commit -m 'Made Interactive'
+git hist --all
+git checkout greet
+git merge master
+more lib/hello.rb 
+vim lib/hello.rb 
+git add lib/hello.rb 
+git commit -m 'Merged master fixed conflict.'
+git checkout greet
+git hist
+git reset --hard f20bd
+git hist --all
+git checkout master
+git hist
+git reset --hard c767
+git reset --hard c867
+git hist --all
+git checkout greet
+git hist -all
+git hist --all
+git checkout master
+git checkout greet
+git rebase master
+git hist
+git checkout master
+git merge greet
+git hist
+cd ..
+pwd
+ls
+git clone hello cloned_hello
+ls
+cd cloned_hello/
+ls
+git hist --all
+git remote
+git remote show origin
+git branch
+git branch -a
+cd ../hello/
+vim readme 
+git add readme 
+git commit -m 'Changed README in original repo'
+cd ../cloned_hello/
+git fetch
+git hist --all
+cat readme 
+git merge origin/master
+cat readme 
+git status
+git merge origin/master
+ls
+pwd
+git hist --all
+cat readme 
+git branch --track greet origin/greet
+git branch -a
+git hist --max-count=1
+cd ..
+ls
+git clone --bare hello/ hello.git
+ls hello.git
+ls
+ls hello.git
+cd hello
+git remote add shared ../hello.git/
+git status
+git hist
+git hist --all
+git hist -a
+vim readme 
+git checkout master
+git add readme 
+git commit -m 'Added shared comment to readme'
+git push shared master
+cd ../cloned_hello/
+git remote add shared ../hello.git/
+git branch --track shared master
+git pull shared master
+cat README
+man git
+man git-branch
+cd ../../
+ls
+cd ..
+ls
+cd ../
+ls
+rm -rf tutorials/
+cd ~/Downloads/n
+cd ~/Downloads/
+ls
+tar -xvzf ghello-0.4.tar.gz 
+ls
+cd ghello-0.4
+ls
+ls
+cd ..
+rm ghello-0.4*
+rm -rf ghello-0.4/
+ls
+mkdir myproject-0.1
+ls
+mv * myproject-0.1/
+ls
+cd myproject-0.1/
+ls
+cd ..
+ls
+tar cvf myproject myproject-0.1/
+ls
+mv myproject myproject.tar.gz
+mv myproject.tar.gz myproject-0.1.tar.gz
+ls
+ls
+rm myproject-0.1.tar.gz 
+man tar
+tar zcvf myproject-0.1.tar.gz myproject-0.1/
+cd myproject-0.1
+ls
+ls -a
+ls
+cd ..
+ls
+rm myproject-0.1.tar.gz 
+rm myproject-0.1.tar.gz 
+tar zcvf myproject-0.1.tar.gz myproject-0.1
+cd ~
+ls
+git init
+git status
+echo "*" > .gitignore
+git status
+vim .gitignore 
+git status
+vim .gitignore 
+git status
+vim .gitignore 
+man git-ignore
+man gitignore
+git status
+ls
+git status
+git status > unversioned
+vim .gitignore 
+cat unversioned >> .gitignore 
+vim .gitignore 
+ls
+l a-a
+ls -a
+rm ..bash_profile.un~ 
+rm ..gitconfig.un~ 
+rm ..vimrc.un~ 
+ls
+ls -a
+vim .vimrc 
+ls .vim/tmp/
+mkdir .vim/tmp/undo
+ls
+ls -a
+rm .bash_profile
+rm .bash_profile~ 
+ls
+ls -a
+git status
+man git-commit
+git commit -a -m 'Dotfiles added'
+git add *
+man git-add
+git add .*
+ls
+ls -a
+rm unversioned 
+git status
+git add .bash_*
+git add .g*
+git add .v*
+vim .vim/bundles/matlab/ftplugin/matlab.vim 
+git add .vim
+vim .vim/bundles/matlab/ftplugin/matlab.vim 
+git add .vim
+vim .vim/bundles/matlab/ftplugin/matlab.vim 
+rm .vim/tmp/backup/matlab.vim~ 
+git add .vim
+git status
+git add .viminfo 
+git add .vimrc
+ls
+ls .git/info/exclude
+more .git/info/exclude
+vim .gitignore 
+git status
+vim .viminfo 
+git status
+git rm --cached .viminfo 
+git commit -m 'First dotfile commit'
+git status
+git add .gitignore
+man git-rm
+git -rm --cached .viminfo
+git rm --cached .viminfo
+git status
+git rm --cached .vim/tmp
+git rm -r --cached .vim/tmp
+git status
+git commit -m 'Removing mistakes from repo'
+git status
+git hist
+vim .gitignore 
+vim .gitignore 
+git status
+git add .gitignore 
+git status
+git commit -m 'Fixed ignoring of vim temp files and .viminfo'
+git status
+git hist
+ls
+ls -a
+more .lesshst 
+echo $SHELL
+git remote add origin git@github.com:striglia/dotfiles.git
+git status
+git branches
+git --help
+git status
+git hist
+git hist --all
+git remote
+ssh-keygen -t rsa -C "striglia@uci.edu"
+more .ssh/id_rsa.pub 
+cat .ssh/id_rsa.pub | pbcopy
+ssh git@github.com
+ssh striglia@github.com
+ssh git@github.com
+clear
+git pull
+git branch
+git remote
+git merge origin
+git fetch
+git merge origin
+git fetch origin
+git status
+vim .gitignore 
+git status
+git add .gitignore 
+git commit -m 'Ignored .ssh'
+git status
+git push origin master
+vim README
+git add README 
+vim .gitignore 
+git add README 
+git co
+git status
+git add .gitignore 
+git st
+ls
+ls -a
+vim .gitconfig 
+git st
+git ci -m 'Added README and excused it from .gitignore'
+git status
+git hist
+git push
+git fetch
+git pull
+git pull origin master
+git status
+vim .bash_profile 
+cd Dropbox/CS\ Projects/
+mkdir open-source
+cd open-source/
+git clone git@github.com:striglia/scikit-learn.git
+ls
+cd scikit-learn/
+ls
+cd ..
+ls
+python --version
+ls
+cd ~
+cd Downloads/
+ls
+rm -f my*
+rm -rf my*
+ls
+python --version
+python
