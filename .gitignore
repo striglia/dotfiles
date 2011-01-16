@@ -10,3 +10,5 @@
 .Trash/
 .dropbox/
 .lesshst
+.viminfo
+.vim/tmp
