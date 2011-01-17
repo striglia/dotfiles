@@ -18,8 +18,13 @@ export PATH
 # Change prompt to not be awful
 export PS1="\u@ \w$ "
 
+# Git aliases
+alias git st="git status"
+alias git ci="git commit"
+
 # Virtualenv 
 export WORKON_HOME=$HOME/virtualenvs
+alias venv="source $HOME/env_ext/virtualenvwrapper.sh"
 source $HOME/env_ext/virtualenvwrapper.sh
 workon default
 

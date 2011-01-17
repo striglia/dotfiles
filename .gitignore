@@ -15,3 +15,10 @@
 .vim/tmp
 .ssh/
 .bash_history
+.Xauthority
+.fontconfig/
+.ipython/
+.matlab/
+.pip/
+.serverauth*
+.vim/.netrwhist
