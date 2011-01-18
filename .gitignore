@@ -22,3 +22,4 @@
 .pip/
 .serverauth*
 .vim/.netrwhist
+.subversion/
