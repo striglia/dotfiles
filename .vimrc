@@ -1,5 +1,8 @@
 filetype off
+" runtime! autoload/pathogen.vim
+" silent! call pathogen#runtime_append_all_bundles()
 call pathogen#runtime_append_all_bundles()
+" call pathogen#helptags()
 syntax on
 filetype plugin indent on
 
@@ -88,10 +91,18 @@ nnoremap ; :
 " Save when losing focus
 au FocusLost * :wa
 
-nnoremap <leader>x :x<cr>
-
 " Leader settings
 nnoremap <leader>v V
+nnoremap <leader>x :x<cr>
+
+" Taglist
+" let Tlist_Ctags_Cmd = '/usr/bin/ctags'
+nnoremap <leader>tt :TlistToggle<cr>:TlistSessionLoad .tlist<cr>
+nnoremap <leader>tl :TlistSessionLoad .tlist<cr>
+nnoremap <leader>ts :TlistSessionSave .tlist<cr>
+nnoremap <leader>ta :TlistAddFiles *.m<cr>
+let Tlist_Exit_OnlyWindow = 1
+let Tlist_WinWidth = 50
 
 " Better escape
 inoremap jj <ESC>

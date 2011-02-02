@@ -21,8 +21,10 @@ alias vim="/usr/local/bin/vim" # Redirect to Vim 7.3
 export EDITOR="/usr/local/bin/vim"
 
 # Git aliases
-alias git st="git status"
-alias git ci="git commit"
+alias gspull="git svn fetch && git svn rebase"
+alias gspush="git svn dcommit"
+alias gs="git status"
+alias gca="git commit -a"
 
 # Virtualenv settings. Places me into default workspace on terminal load.
 export WORKON_HOME=$HOME/virtualenvs
@@ -33,6 +35,8 @@ workon default
 # Make pip play nice with virtualenv
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
 export PIP_RESPECT_VIRTUALENV=true
+
+# Finished adapting your PATH environment variable for use with MacPorts.
 
 # Setting PATH for Python 2.7
 # The orginal version is saved in .bash_profile.pysave
