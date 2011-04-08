@@ -2,6 +2,11 @@ alias dlab1="ssh datalab-1.ics.uci.edu"
 alias dlab2="ssh datalab-2.ics.uci.edu"
 alias dlab3="ssh datalab-3.ics.uci.edu"
 alias dlab4="ssh datalab-4.ics.uci.edu"
+alias dlab5="ssh datalab-5.ics.uci.edu"
+alias dlab6="ssh datalab-6.ics.uci.edu"
+alias dlab7="ssh datalab-7.ics.uci.edu"
+alias dlab8="ssh datalab-8.ics.uci.edu"
+alias markov="ssh markov.ics.uci.edu"
 
 PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:${PATH}" # Assorted
 PATH="/usr/texbin:/usr/X11/bin:/opt/local/bin:${PATH}" # Tex/X
@@ -26,6 +31,11 @@ alias gspush="git svn dcommit"
 alias gs="git status"
 alias gca="git commit -a"
 
+# Setting PATH for Python 2.7
+# The orginal version is saved in .bash_profile.pysave
+PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:${PATH}"
+export PATH
+
 # Virtualenv settings. Places me into default workspace on terminal load.
 export WORKON_HOME=$HOME/virtualenvs
 alias venv="source $HOME/env_ext/virtualenvwrapper.sh"
@@ -36,9 +46,3 @@ workon default
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
 export PIP_RESPECT_VIRTUALENV=true
 
-# Finished adapting your PATH environment variable for use with MacPorts.
-
-# Setting PATH for Python 2.7
-# The orginal version is saved in .bash_profile.pysave
-PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:${PATH}"
-export PATH

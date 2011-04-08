@@ -22,6 +22,7 @@ set expandtab
 
 " Color Scheme
 set background=dark
+" colorscheme solarized
 colorscheme molokai
 
 set encoding=utf-8
@@ -38,7 +39,7 @@ set ttyfast
 set ruler
 set backspace=indent,eol,start
 set laststatus=2
-set relativenumber
+" set relativenumber
 set undofile
 
 let mapleader = ","
