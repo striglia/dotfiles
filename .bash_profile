@@ -29,7 +29,7 @@ function dlabCPUS
       SSHVAR="datalab-$VAL"
     fi
     PERC=`ssh $SSHVAR.ics.uci.edu mpstat | tail -1 | awk '{print $11}'`
-    FRAC=`echo "$PERC * 8 / 100" | bc -l`
+    FRAC=`echo "$PERC * $NCPUS / 100" | bc -l`
     TMP=`printf %0.2f $FRAC`
     if [ $VAL == 9 ]; then
       echo -e "$SSHVAR\t\t$NCPUS\t$TMP"
