@@ -15,6 +15,32 @@ PATH="/Users/striglia/bin:${PATH}"
 export PATH
 
 # Various niceties for the shell
+function dlabCPUS
+{ 
+  echo -e "Host\t\tCPUS\tFREE"
+  TOTALFREE=0
+  for VAL in {1..9}
+  do 
+    if [ $VAL == 9 ]; then 
+      NCPUS=16
+      SSHVAR="markov"
+    else
+      NCPUS=8
+      SSHVAR="datalab-$VAL"
+    fi
+    PERC=`ssh $SSHVAR.ics.uci.edu mpstat | tail -1 | awk '{print $11}'`
+    FRAC=`echo "$PERC * 8 / 100" | bc -l`
+    TMP=`printf %0.2f $FRAC`
+    if [ $VAL == 9 ]; then
+      echo -e "$SSHVAR\t\t$NCPUS\t$TMP"
+    else
+      echo -e "$SSHVAR\t$NCPUS\t$TMP"
+    fi
+    TOTALFREE=$(($TOTALFREE + `echo "$TMP" | cut -d"." -f1`))
+  done
+  echo -e "----------------------------------\nFree Procs\t\t$TOTALFREE"
+}
+
 alias rm="rm -i"
 alias mv="mv -v"
 export CLICOLOR=1
