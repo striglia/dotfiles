@@ -6,6 +6,7 @@
 *~
 *.swp
 
+.cups/
 .CFUserTextEncoding
 .DS_Store
 .Trash/
