@@ -14,6 +14,10 @@ PATH="/usr/local/git/bin:${PATH}" # Git
 PATH="/Users/striglia/bin:${PATH}"
 export PATH
 
+function parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+
 # Various niceties for the shell
 function dlabCPUS
 { 
@@ -45,7 +49,8 @@ alias rm="rm -i"
 alias mv="mv -v"
 export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
-export PS1="\u@ \w$ "
+export PS1="\[\e[0;32m\] \w \[\e[0;31m\]\$(parse_git_branch) \[\e[00m\]$\[\e[00m\] "
+# export PS1="\[\e[0;32m\] \u@\h \[\e[0;34m\] \w \[\e[0;31m\]\$(parse_git_branch) \[\e[00m\]$\[\e[00m\] "
 
 # Vim
 alias vim="/usr/local/bin/vim" # Redirect to Vim 7.3
