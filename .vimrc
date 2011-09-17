@@ -74,12 +74,13 @@ nnoremap k gk
 
 " Folding
 set foldenable
+set foldmethod=indent
 set foldlevel=100 " No autofolding
 set foldopen=block,hor,mark,percent,quickfix,tag
-function SimpleFoldText() " {
-    return getline(v:foldstart).' '
-endfunction " }
-set foldtext=SimpleFoldText() " Custom fold text function 
+" function SimpleFoldText() " {
+"     return getline(v:foldstart).' '
+" endfunction " }
+" set foldtext=SimpleFoldText() " Custom fold text function 
 nnoremap <space> za
 vnoremap <space> zf
 
