@@ -15,9 +15,9 @@ set backup                        " enable backups
 set nocompatible
 set modelines=0
 
-set tabstop=2
-set shiftwidth=2
-set softtabstop=2
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
 set expandtab
 
 " Color Scheme
@@ -59,7 +59,7 @@ vnoremap <tab> %
 set wrap
 set textwidth=79
 set formatoptions=qrn1
-" set colorcolumn=85
+set colorcolumn=80
 
 nnoremap <up> <nop>
 nnoremap <down> <nop>
@@ -107,10 +107,13 @@ let Tlist_Exit_OnlyWindow = 1
 let Tlist_WinWidth = 50
 
 " Better escape
-inoremap jj <ESC>
+inoremap jk <ESC>
 
 " Better edit .vimrc
 nnoremap <leader>ev <C-w><C-v><C-l>:e $MYVIMRC<cr>
+
+" Allow visible whitespace with :set list!
+set listchars=tab:>-,trail:~,extends:>,precedes:<
 
 " Split window with <ldr>w. Move with ctrl-hjkl
 nnoremap <leader>w <C-w>v<C-w>l

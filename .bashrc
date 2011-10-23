@@ -8,6 +8,8 @@ alias dlab7="ssh datalab-7.ics.uci.edu"
 alias dlab8="ssh datalab-8.ics.uci.edu"
 alias markov="ssh markov.ics.uci.edu"
 
+alias ec2free="ssh -i ST_Keypair.pem ec2-user@ec2-50-16-172-235.compute-1.amazonaws.com"
+
 PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:${PATH}" # Assorted
 PATH="/usr/texbin:/usr/X11/bin:/opt/local/bin:${PATH}" # Tex/X
 PATH="/usr/local/git/bin:${PATH}" # Git
@@ -16,33 +18,6 @@ export PATH
 
 function parse_git_branch() {
   git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
-}
-
-# Various niceties for the shell
-function dlabCPUS
-{ 
-  echo -e "Host\t\tCPUS\tFREE"
-  TOTALFREE=0
-  for VAL in {1..9}
-  do 
-    if [ $VAL == 9 ]; then 
-      NCPUS=16
-      SSHVAR="markov"
-    else
-      NCPUS=8
-      SSHVAR="datalab-$VAL"
-    fi
-    PERC=`ssh $SSHVAR.ics.uci.edu mpstat 1 1 | tail -1 | awk '{print $11}'`
-    FRAC=`echo "$PERC * $NCPUS / 100" | bc -l`
-    TMP=`printf %0.2f $FRAC`
-    if [ $VAL == 9 ]; then
-      echo -e "$SSHVAR\t\t$NCPUS\t$TMP"
-    else
-      echo -e "$SSHVAR\t$NCPUS\t$TMP"
-    fi
-    TOTALFREE=$(($TOTALFREE + `echo "$TMP" | cut -d"." -f1`))
-  done
-  echo -e "----------------------------------\nFree Procs\t\t$TOTALFREE"
 }
 
 alias rm="rm -i"
