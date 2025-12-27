@@ -1,24 +1,8 @@
 [user]
-	name = striglia
+	name = Scott Triglia
 	email = scott.triglia@gmail.com
-[core]
-	autocrlf = input
-	safecrlf = true
-[alias]
-  co = checkout
-  ci = commit
-  st = status
-  br = branch
-  hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
-  type = cat-file -t
-  dump = cat-file -p
-  spush = svn dcommit
-  aliases = !git config --get-regexp 'alias.*' | colrm 1 6 | sed 's/[ ]/ = /'
-  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
-
-[color "status"]
-  added = yellow
-  changed = green
-  untracked = cyan
-
-
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
