@@ -31,11 +31,12 @@ Complete workflow for implementing features tracked in GitHub Issues.
 
 ## Core Workflow
 
-The workflow has three phases based on the argument provided:
+The complete workflow has four phases:
 
 1. **Start**: `/git-workflow {issue-number}` - Create feature branch
 2. **Commit**: `/git-workflow commit` - Stage and commit changes
 3. **Push**: `/git-workflow push` - Push branch and create PR
+4. **Review**: `/fix-pr-feedback` - Address reviewer feedback and iterate
 
 ## Phase 1: Start Working on Issue
 
@@ -156,7 +157,55 @@ The workflow has three phases based on the argument provided:
 
 6. **Confirm success**:
    - Display: "✓ Created PR: {pr_url}"
-   - Display: "Done! Merge on GitHub when ready."
+   - Display: "Next: Wait for code review, then use `/fix-pr-feedback` to address comments."
+
+## Phase 4: Feedback Loop with Reviewers
+
+**When**: After PR is created and reviewers provide feedback
+
+**Overview**: Iterate with reviewers to finalize the PR before merging.
+
+**Process**:
+
+1. **Wait for review feedback**:
+   - Reviewers comment on PR with suggestions, questions, or requested changes
+   - CI/CD checks may fail and require fixes
+   - GitHub will notify you of new comments
+
+2. **Address feedback using `/fix-pr-feedback`**:
+   - Run: `/fix-pr-feedback` (auto-detects PR from current branch)
+   - Or: `/fix-pr-feedback {pr-url}` (specify PR explicitly)
+
+   This command will:
+   - Fetch all review comments since last commit
+   - Filter out non-actionable feedback (bot messages, status updates)
+   - Check for failing CI/test runs and investigate failures
+   - Analyze feedback and make wise decisions about what to implement
+   - Fix critical issues and low-effort improvements
+   - Skip items already tracked in GitHub issues (defer to future work)
+   - Create focused commits for each category of fixes
+   - Push updates to the PR
+   - Comment on PR explaining decisions and rationale
+
+3. **Iterate as needed**:
+   - Reviewers may request additional changes
+   - Run `/fix-pr-feedback` again to address new comments
+   - Continue until reviewers approve
+
+4. **Merge when approved**:
+   - Once reviewers approve and CI passes, PR is ready to merge
+   - User or maintainer merges on GitHub
+   - GitHub automatically closes the linked issue (via "Closes #{number}")
+   - GitHub automatically deletes the feature branch (if configured)
+
+**Key principles**:
+- Be responsive to feedback - address comments promptly
+- Make wise decisions - not all feedback requires immediate action
+- Communicate clearly - explain your decisions in PR comments
+- Keep commits focused - group related fixes together
+- Test thoroughly - ensure fixes don't break existing functionality
+
+**For detailed workflow**: See `/fix-pr-feedback` command documentation
 
 ## Branch Naming Convention
 
