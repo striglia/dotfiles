@@ -16,6 +16,18 @@ Invoke when the user wants to:
 - Visually refine and critique a web interface
 - Compare design iterations side-by-side
 
+## Why Craft Matters (Stripe's Perspective)
+
+**Business Value of Beauty:**
+- Beautiful interfaces are perceived to work better (aesthetic-usability effect)
+- Refined design builds user trust in your product and company
+- When competition is high, quality details become your differentiation
+- Craft isn't a nice-to-have luxury—it's a competitive necessity
+- Users get better outcomes from products they find beautiful and compelling
+
+**MVQP Mindset:**
+Ship quality, not just features. A Minimum Viable Quality Product solves the user problem completely with the refinement needed to build trust and enable effective use.
+
 ## Prerequisites
 
 - Development server must be running (e.g., `make dev`)
@@ -52,10 +64,15 @@ Invoke when the user wants to:
    - ✅ Item 1
    - ✅ Item 2
 
-   **Critical Issues:**
-   1. ❌ Issue with specific suggestion
-   2. ❌ Issue with specific suggestion
-   3. ❌ Issue with specific suggestion
+   **Critical Issues (through Stripe's lens):**
+   1. ❌ Trust: [Issue affecting user confidence] → [Specific fix]
+   2. ❌ Details: [What lacks intentionality] → [Specific fix]
+   3. ❌ Usability: [How beauty could improve function] → [Specific fix]
+
+   **MVQP Check:**
+   - Does it solve the problem completely? [Yes/No + gap]
+   - Does it build trust in the product/company? [Yes/No + what's missing]
+   - Are details differentiated or generic? [Assessment]
 
    **Target for next iteration:** [Specific goals]
    ```
@@ -107,42 +124,57 @@ For each iteration cycle:
 
 ## Design Principles
 
+### Stripe's Philosophy: Craft as Business Value
+
+**Core Beliefs:**
+- **MVQP over MVP**: Build a Minimum Viable _Quality_ Product that solves the user problem completely, with refinement that helps them use it effectively and builds trust
+- **Aesthetic-Usability Effect**: Beautiful things are perceived to work better and get better outcomes
+- **Trust Through Beauty**: Refined design isn't decoration—it builds user confidence in your product and company
+- **Differentiation Through Details**: When competition is high, quality in details becomes the differentiator
+- **Objectivity in Beauty**: There's continuity in what people find beautiful—it's not purely subjective
+
 ### Stripe-Level Quality Checklist
 
 **Elevation & Depth:**
-- [ ] Subtle shadows (avoid heavy drop shadows)
-- [ ] Layered visual hierarchy
+- [ ] Subtle shadows that create hierarchy (avoid heavy drop shadows)
+- [ ] Layered visual hierarchy that guides the eye
 - [ ] Smooth transitions (200-300ms with ease curves)
+- [ ] Depth that feels natural, not forced
 
 **Typography:**
-- [ ] Clear hierarchy (max 3-4 sizes)
+- [ ] Clear hierarchy (max 3-4 sizes) that communicates importance
 - [ ] Proper font smoothing (-webkit-font-smoothing, -moz-osx-font-smoothing)
 - [ ] Tight letter spacing on headings (-0.01em to -0.02em)
 - [ ] Readable body text (1.4-1.6 line-height)
+- [ ] Typography that builds trust through clarity
 
 **Color:**
-- [ ] Limited palette (3-4 main colors)
-- [ ] Sufficient contrast (WCAG AA minimum)
-- [ ] Subtle gradients (not harsh)
-- [ ] Muted secondary colors
+- [ ] Limited palette (3-4 main colors) with purpose
+- [ ] Sufficient contrast (WCAG AA minimum) for usability
+- [ ] Subtle gradients that add depth (not harsh)
+- [ ] Muted secondary colors that support, don't distract
+- [ ] Color choices that feel confident and professional
 
 **Spacing:**
 - [ ] Consistent spacing scale (use CSS variables)
-- [ ] Generous whitespace
+- [ ] Generous whitespace that creates calm and focus
 - [ ] Aligned to grid (8px or 4px base)
+- [ ] Breathing room that shows confidence in simplicity
 
 **Micro-interactions:**
-- [ ] Hover states on interactive elements
-- [ ] Smooth state transitions
-- [ ] Visual feedback for actions
+- [ ] Hover states that invite interaction
+- [ ] Smooth state transitions that feel polished
+- [ ] Visual feedback for actions that builds trust
 - [ ] Proper cursor changes (grab, pointer, etc.)
+- [ ] Interactions that feel responsive and alive
 
 **Polish Details:**
-- [ ] Rounded corners (0.375rem - 0.75rem)
-- [ ] Border styles (1px solid, subtle colors)
-- [ ] Empty states with helpful messaging
-- [ ] Loading states
-- [ ] Error states
+- [ ] Rounded corners (0.375rem - 0.75rem) applied consistently
+- [ ] Border styles (1px solid, subtle colors) that define without dominating
+- [ ] Empty states with helpful, human messaging
+- [ ] Loading states that manage expectations
+- [ ] Error states that maintain trust even when things go wrong
+- [ ] Every pixel intentional—no "good enough" compromises
 
 ### Common Issues to Fix
 
@@ -169,13 +201,13 @@ For each iteration cycle:
 
 ## Rating Guide
 
-**1-3/10**: Broken or unusable
-**4-5/10**: Functional but ugly
-**6/10**: Functional, clean, but generic
-**7/10**: Good, some personality, few polish issues
-**8/10**: Very good, polished, Stripe-like quality
-**9/10**: Excellent, delightful, memorable
-**10/10**: Perfect, industry-leading design
+**1-3/10**: Broken or unusable - fails to solve the problem
+**4-5/10**: Functional but ugly - MVP mindset, no trust-building
+**6/10**: Functional, clean, but generic - lacks confidence and differentiation
+**7/10**: Good, some personality, few polish issues - getting there but details need work
+**8/10**: MVQP achieved - polished, builds trust, Stripe-like quality with intentional details
+**9/10**: Excellent, delightful, memorable - differentiated through craft, joy in use
+**10/10**: Perfect, industry-leading design - every detail serves both form and function
 
 ## Tips for Success
 
@@ -185,7 +217,10 @@ For each iteration cycle:
 4. **Use specific design language** - "Subtle shadow" not "make it prettier"
 5. **Take full-page screenshots** - Capture mobile views too
 6. **Document the journey** - Save all version screenshots for comparison
-7. **Stop at target** - Don't over-optimize (8/10 is great for MVP)
+7. **Think MVQP, not MVP** - 8/10 is the minimum for trust-building quality
+8. **Ask "Does this build trust?"** - Every design choice should inspire confidence
+9. **Details differentiate** - When everything works, craft is what sets you apart
+10. **Beauty serves function** - Don't add decoration; refine until form and function marry
 
 ## Example Invocations
 
