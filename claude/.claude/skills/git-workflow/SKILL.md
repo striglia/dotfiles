@@ -10,11 +10,23 @@ Complete workflow for implementing features tracked in GitHub Issues.
 
 ## When to Use This Skill
 
-**Automatic (always apply these rules)**:
-- When implementing any feature or fix
-- When making code changes
-- When user asks to "implement X" or "fix Y"
-- **NEVER commit directly to main** - always use this workflow
+**Recognize user intent, not literal phrases:**
+
+Invoke this skill immediately when the user indicates they want you to:
+- Start working on a GitHub issue (by number or URL)
+- Implement a feature tracked by an issue
+- Fix a bug tracked by an issue
+- Make code changes associated with an issue
+
+**Action: Invoke `/git-workflow {issue-number}` as your FIRST response**
+
+Do NOT:
+- Fetch the issue yourself
+- Create a todo list first
+- Start making changes
+- Create branches manually
+
+The skill handles the complete workflow from start to finish.
 
 **Explicit invocation**:
 - User says `/git-workflow 42` or `/git-workflow {issue-number}`
