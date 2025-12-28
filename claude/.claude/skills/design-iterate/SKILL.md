@@ -34,8 +34,8 @@ Invoke when the user wants to:
    # Navigate with Playwright
    playwright_navigate(url, headless=false, width=1440, height=900)
 
-   # Take screenshot
-   playwright_screenshot(name="design-v1", fullPage=false)
+   # Take screenshot (using /tmp for automatic cleanup)
+   playwright_screenshot(name="design-v1", fullPage=false, downloadsDir="/tmp", savePng=true)
    ```
 
 2. **Read and analyze screenshot**
@@ -75,7 +75,7 @@ For each iteration cycle:
    playwright_close()
    playwright_navigate(url)
    sleep 3  # Wait for full load
-   playwright_screenshot(name="design-v{N}")
+   playwright_screenshot(name="design-v{N}", downloadsDir="/tmp", savePng=true)
    ```
 
 3. **Analyze improvements**
