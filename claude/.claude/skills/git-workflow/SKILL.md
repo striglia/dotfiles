@@ -153,7 +153,7 @@ The complete workflow has four phases:
 5. **Create PR**:
    - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
    - Get commit list: `git log origin/main..HEAD --pretty=format:"- %s"`
-   - Format PR title: `{issue_title} (#{issue_num})`
+   - Format PR title: `{issue_title}`
    - Format PR body:
      ```
      Closes #{issue_num}
