@@ -1,6 +1,9 @@
 /*
 !.*
 !README
+!git/
+!zsh/
+!claude/
 
 # Ignore tmp and swap files
 *~
