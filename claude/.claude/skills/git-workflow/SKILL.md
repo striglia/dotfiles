@@ -114,12 +114,26 @@ The complete workflow has four phases:
 4. **Stage all changes**:
    - Run: `git add .`
 
-5. **Create commit**:
+5. **Generate transcript** (for significant work):
+   - Run: `/export-session --gist` to upload session transcript
+   - Capture the gistpreview.github.io URL from output
+   - This creates a permanent record of the development session
+
+6. **Create commit**:
    - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
-   - Format commit message: `#{issue_num}: {issue_title}`
+   - Format commit message with transcript link:
+     ```
+     #{issue_num}: {issue_title}
+
+     Transcript: {gistpreview_url}
+
+     🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+     ```
    - Run: `git commit -m "{commit_msg}"`
 
-6. **Confirm success**:
+7. **Confirm success**:
    - Display: "✓ Committed: {commit_msg}"
    - Show latest commit: `git log -1 --oneline`
    - Display: "Next step: /git-workflow push"
@@ -237,6 +251,17 @@ The complete workflow has four phases:
 
 **Format**: `#{issue-number}: {issue-title}`
 
+**With transcript** (recommended for significant work):
+```
+#{issue-number}: {issue-title}
+
+Transcript: https://gistpreview.github.io/?{gist-id}/index.html
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
 **Examples**:
 - `#8: Fix wasteful test process and auto-run behavior`
 - `#42: Add user authentication`
@@ -246,6 +271,7 @@ The complete workflow has four phases:
 - GitHub automatically links to issue
 - Clear traceability
 - Consistent across all commits in the project
+- Transcript link provides full context of LLM-assisted development (à la Simon Willison)
 
 ## Error Handling
 
@@ -279,3 +305,6 @@ The complete workflow has four phases:
 - Issue number is the single source of truth (stored in branch name)
 - Multiple commits to same branch are fine - all will be included in PR
 - If user is already on a feature branch, detect issue number automatically
+- For significant work, always generate a transcript with `/export-session --gist`
+- Include the transcript URL in commit messages for full development context
+- This follows Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
