@@ -1,6 +1,6 @@
 ---
 name: export-session
-description: Export the current Claude Code session to JSONL/Markdown with an auto-generated descriptive filename based on session content
+description: Export the current Claude Code session to JSONL/Markdown with an auto-generated descriptive filename based on session content (user)
 allowed-tools: Bash(*), Read(*)
 ---
 
@@ -11,13 +11,22 @@ Export the current Claude Code session to a file with a descriptive name based o
 ## Usage
 
 ```bash
-/export-session [--format=jsonl|md|both]
+/export-session [options]
 ```
 
-**Format options**:
-- `jsonl` - Export only JSONL (default if format not specified)
-- `md` - Export only Markdown
-- `both` - Export both JSONL and Markdown
+**Options**:
+- `--format=jsonl|md|both` - Output format (default: both)
+- `--output=<dir>` - Output directory (default: current directory)
+- `--gist` - Upload to GitHub Gist and return shareable URL
+- `--html` - Generate nicely formatted HTML (requires `uvx claude-code-transcripts`)
+
+**Examples**:
+```bash
+/export-session                           # Export JSONL + MD to current dir
+/export-session --output=transcripts      # Export to transcripts/ folder
+/export-session --gist                    # Upload HTML transcript to Gist
+/export-session --gist --output=transcripts  # Both: local copy + Gist
+```
 
 ## When to Use This Skill
 
@@ -32,6 +41,8 @@ Export the current Claude Code session to a file with a descriptive name based o
 2. **Analyzes session content** to generate a descriptive filename
 3. **Exports to JSONL** with full conversation history (one JSON object per line)
 4. **Exports to Markdown** for easier reading
+5. **Optionally uploads to Gist** for shareable URLs (with `--gist`)
+6. **Optionally generates HTML** using Simon Willison's `claude-code-transcripts` tool
 
 ## Workflow
 
@@ -214,6 +225,102 @@ Error: jq is required but not installed
 Install with: brew install jq
 ```
 
+## --output Flag: Custom Output Directory
+
+When `--output=<dir>` is specified, create the directory if it doesn't exist and save files there:
+
+```bash
+OUTPUT_DIR="${OUTPUT_DIR:-.}"  # Default to current directory
+
+# Create directory if needed
+mkdir -p "$OUTPUT_DIR"
+
+# Export files to the specified directory
+cp "$LATEST_SESSION" "$OUTPUT_DIR/claude-session-${FILENAME}.jsonl"
+# ... same for .md file
+```
+
+**Report output location**:
+```bash
+echo "Files created in: $OUTPUT_DIR/"
+echo "  📄 $OUTPUT_DIR/claude-session-${FILENAME}.jsonl"
+echo "  📝 $OUTPUT_DIR/claude-session-${FILENAME}.md"
+```
+
+## --gist Flag: Upload to GitHub Gist
+
+When `--gist` is specified, generate HTML using `claude-code-transcripts` and upload to Gist with BOTH the HTML (human-readable) and JSONL (machine-readable) files.
+
+### Prerequisites Check
+
+```bash
+# Check if gh CLI is installed and authenticated
+if ! command -v gh &> /dev/null; then
+    echo "Error: GitHub CLI (gh) is required for --gist"
+    echo "Install with: brew install gh"
+    echo "Then run: gh auth login"
+    exit 1
+fi
+
+# Check if uvx is available
+if ! command -v uvx &> /dev/null; then
+    echo "Error: uvx is required for --gist (part of uv)"
+    echo "Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    exit 1
+fi
+```
+
+### Generate HTML + JSONL and Upload to Gist
+
+**Important**: Use the two-step approach to include BOTH HTML and JSONL in the gist:
+
+```bash
+# Step 1: Generate HTML + JSONL to a temp directory
+TEMP_DIR=$(mktemp -d)/transcript
+uvx claude-code-transcripts json "$LATEST_SESSION" --json -o "$TEMP_DIR"
+
+# Step 2: Upload ALL files (HTML + JSONL) to gist
+GIST_URL=$(gh gist create "$TEMP_DIR"/* --public)
+
+# Step 3: Extract gist ID and construct preview URL
+GIST_ID=$(echo "$GIST_URL" | grep -o '[^/]*$')
+PREVIEW_URL="https://gistpreview.github.io/?${GIST_ID}/index.html"
+
+# Step 4: Report results
+echo ""
+echo "✓ Uploaded to GitHub Gist!"
+echo ""
+echo "  📖 $PREVIEW_URL"
+echo ""
+echo "  (Raw gist: $GIST_URL)"
+```
+
+This creates a gist containing:
+- `index.html` - Human-readable summary page
+- `page-001.html`, `page-002.html`, etc. - Paginated transcript
+- `<session-id>.jsonl` - Raw machine-readable session data
+
+### Combined Usage (--gist + --output)
+
+When both flags are specified:
+1. First export JSONL/MD to the output directory (local backup)
+2. Then run the gist upload
+
+```bash
+# Example output for combined usage:
+echo "✓ Session exported successfully!"
+echo ""
+echo "Local files:"
+echo "  📄 transcripts/claude-session-${FILENAME}.jsonl"
+echo "  📝 transcripts/claude-session-${FILENAME}.md"
+echo ""
+echo "GitHub Gist:"
+echo "  📖 https://gistpreview.github.io/?abc123/index.html"
+echo ""
+echo "Add to commit message:"
+echo "  Transcript: https://gistpreview.github.io/?abc123/index.html"
+```
+
 ## Tips
 
 - The JSONL export is an exact copy of Claude Code's internal format
@@ -231,5 +338,35 @@ Install with: brew install jq
 4. **Sanitize filenames**: remove special characters that could cause issues
 5. **Show progress**: Let user know what's happening at each step
 6. **Report errors clearly**: If jq missing, session not found, etc.
-7. **Both formats**: Always create both JSONL and Markdown
+7. **Both formats**: Always create both JSONL and Markdown by default
 8. **JSONL is primary**: Just copy the original file, don't convert to JSON array
+9. **Parse flags**: Check for `--output=<dir>`, `--gist`, `--format=<type>` in args
+10. **For --gist**: Use the TWO-STEP approach:
+    - Step 1: `uvx claude-code-transcripts json <session> --json -o <temp_dir>`
+    - Step 2: `gh gist create <temp_dir>/* --public`
+    - This ensures BOTH HTML and JSONL are in the same gist
+11. **Output the preview URL prominently**: `https://gistpreview.github.io/?<gist_id>/index.html`
+12. **Install check**: Before using --gist, verify `gh` and `uvx` are available
+
+## Typical Workflow for Tool Development
+
+When building a tool and wanting to record the session:
+
+```bash
+# 1. After completing the tool, export session to transcripts folder
+/export-session --output=transcripts
+
+# 2. Or upload to Gist for sharing
+/export-session --gist
+
+# 3. Include the gist link in your commit message:
+git commit -m "Add JSON formatter tool
+
+Transcript: https://gistpreview.github.io/?abc123/index.html"
+```
+
+## References
+
+- Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
+- claude-code-transcripts tool: https://github.com/simonw/claude-code-transcripts
+- Example transcript: https://gistpreview.github.io/?07b9099049de2debfae8908aa550b56a/index.html
