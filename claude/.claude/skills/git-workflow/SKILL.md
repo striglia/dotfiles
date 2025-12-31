@@ -40,6 +40,7 @@ The skill handles the complete workflow from start to finish.
 3. **ALWAYS use proper commit message format: `#{number}: {title}`**
 4. **ALWAYS create a Pull Request - never merge without PR**
 5. **ALWAYS include "Closes #{number}" in PR body**
+6. **Export session transcript** with `/export-session --gist` and include URL in commit message (default: ON, opt-out via CLAUDE.md)
 
 ## Core Workflow
 
@@ -114,8 +115,10 @@ The complete workflow has four phases:
 4. **Stage all changes**:
    - Run: `git add .`
 
-5. **Generate transcript** (for significant work):
-   - Run: `/export-session --gist` to upload session transcript
+5. **Generate transcript** (default: ON):
+   - First, check if CLAUDE.md contains `skip-session-transcripts: true`
+   - If opt-out is set, skip this step
+   - Otherwise, run: `/export-session --gist` to upload session transcript
    - Capture the gistpreview.github.io URL from output
    - This creates a permanent record of the development session
 
@@ -251,7 +254,7 @@ The complete workflow has four phases:
 
 **Format**: `#{issue-number}: {issue-title}`
 
-**With transcript** (recommended for significant work):
+**With transcript** (default, unless opted out):
 ```
 #{issue-number}: {issue-title}
 
@@ -305,6 +308,19 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - Issue number is the single source of truth (stored in branch name)
 - Multiple commits to same branch are fine - all will be included in PR
 - If user is already on a feature branch, detect issue number automatically
-- For significant work, always generate a transcript with `/export-session --gist`
+- Generate transcript with `/export-session --gist` before committing (unless `skip-session-transcripts: true` in CLAUDE.md)
 - Include the transcript URL in commit messages for full development context
 - This follows Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
+
+## Session Transcript Opt-Out
+
+To disable automatic session transcript export for a project, add this to CLAUDE.md:
+
+```markdown
+skip-session-transcripts: true
+```
+
+This is useful for:
+- Private/sensitive projects where transcripts shouldn't be public
+- Quick fixes where full transcript context isn't valuable
+- Projects with strict data handling requirements
