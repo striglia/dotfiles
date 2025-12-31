@@ -315,8 +315,10 @@ echo "✓ View PR: $pr_url"
 
 CRITICAL: Always post a comment explaining what was done and why.
 
+Write the comment to a temp file first, then use --body-file to avoid shell path interpretation issues:
+
 ```bash
-gh pr comment "$pr_number" --body "$(cat <<'EOF'
+cat > /tmp/pr-$pr_number-comment.md << 'EOF'
 ## 🤖 Fix PR Feedback - Completed
 
 Processed [N] feedback comments since last commit and made the following decisions:
@@ -341,7 +343,10 @@ Processed [N] feedback comments since last commit and made the following decisio
 
 🤖 Generated with /fix-pr-feedback
 EOF
-)"
+```
+
+```bash
+gh pr comment "$pr_number" --body-file /tmp/pr-$pr_number-comment.md
 ```
 
 This ensures reviewers understand the thought process and can verify decisions were made wisely.
