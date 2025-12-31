@@ -31,7 +31,19 @@ Invoke when the user has:
 
 ## Core Philosophy
 
-**Non-obvious questions only.** Never ask:
+### Self-Sufficiency is Paramount
+
+The enriched spec (especially when posted to GitHub) must be **completely self-sufficient**. A future implementer - human or AI - reading ONLY this document should have everything needed to build the feature correctly.
+
+This means:
+- Capture the WHY, not just the WHAT
+- Include rationale for every decision
+- Document edge cases explicitly
+- Don't assume context from the interview is obvious
+
+### Non-obvious questions only
+
+Never ask:
 - Questions the document already answers
 - Questions with obvious answers from context
 - Generic checklist questions
@@ -92,9 +104,13 @@ Conduct multiple rounds of questioning using `AskUserQuestion`. Each round shoul
 
 1. **Preserve original structure** where possible
 2. **Add new sections** for discovered requirements
-3. **Annotate with decisions** made during interview
-4. **Include explicit tradeoff documentation**
-5. **Write back to the original file** (or create new if requested)
+3. **Annotate with decisions** made during interview - include RATIONALE, not just the decision
+4. **Include explicit tradeoff documentation** - what alternatives were considered and why rejected
+5. **Capture interview insights** - context that emerged from Q&A that shapes implementation
+6. **Document all edge cases** discussed, with explicit handling
+7. **Write back to the original file** (or create new if requested)
+
+**Remember**: This spec may be posted to GitHub. Write it as if the reader has zero context from the interview.
 
 ### Phase 4: Post Back to GitHub (if applicable)
 
@@ -102,29 +118,43 @@ If the original plan came from a GitHub issue:
 
 1. **Ask user for confirmation**: "Would you like me to post this enriched plan as a comment on issue #X?"
 
-2. **If confirmed**, post a summary comment including:
-   - Key decisions table
-   - User flows overview
-   - Technical approach highlights
-   - Out of scope items
-   - Note that the plan was developed using `/enrich-plan`
+2. **If confirmed**, post the COMPLETE enriched spec. Do NOT summarize or compress.
 
-3. **Format for GitHub**: Use markdown tables, collapsible sections for lengthy details
+   **Critical framing**: The GitHub comment must be **self-sufficient**. Future implementers (including other Claude Code sessions) will ONLY have access to this issue. They won't have:
+   - The local enriched spec file
+   - The interview transcript
+   - Context from this conversation
 
-Example:
-```bash
-gh issue comment {issue-number} --body "## Enriched Implementation Plan
+   **You MUST include:**
+   - Every decision with its rationale (the WHY, not just the WHAT)
+   - All edge cases discussed, with explicit handling
+   - Error scenarios and fallbacks
+   - UI/UX behavior details (loading states, empty states, error states)
+   - Testing strategy highlights
+   - Key insights from the interview that informed decisions
+   - Out of scope items with explanation of WHY they're deferred
 
-After running through the \`/enrich-plan\` skill...
+3. **Use collapsible sections for organization**, not truncation:
+   ```markdown
+   <details>
+   <summary>Edge Cases & Error Handling (click to expand)</summary>
 
-| Topic | Decision |
-|-------|----------|
-| ... | ... |
+   | Scenario | Behavior | Rationale |
+   |----------|----------|-----------|
+   | No profile exists | Show generic recommendation | Safe default for new users |
 
-*This plan was developed using the \`/enrich-plan\` skill to systematically clarify requirements.*"
-```
+   </details>
+   ```
 
-This creates a documented audit trail linking the GitHub issue to the implementation decisions.
+4. **Format for scannability**: Use tables with rationale columns, clear headers, and visual hierarchy. But NEVER sacrifice completeness for brevity.
+
+5. **Include authoritative footer**:
+   ```markdown
+   ---
+   *This is the authoritative implementation spec, developed using `/enrich-plan`. Future implementers should treat this document as the source of truth.*
+   ```
+
+**Why this matters**: GitHub issues are the persistent record. Local spec files may not exist when someone else picks up the work. The comment IS the spec.
 
 ## Question Categories
 
@@ -195,52 +225,91 @@ Use these as starting points - always customize based on the specific document:
 
 ## Output Format
 
-The enriched spec should include:
+The enriched spec should include ALL of the following. This format is designed to be **self-sufficient** - a future implementer reading only this document should have everything they need.
 
 ```markdown
 # [Feature Name]
 
 ## Overview
-[Original or refined overview]
+[Original or refined overview - what are we building and why]
 
-## Decisions Made
-- **[Topic]**: [Decision] - [Rationale]
-- **[Topic]**: [Decision] - [Rationale]
+## Key Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| [Topic] | [What we decided] | [WHY we decided this - the reasoning from the interview] |
+| [Topic] | [What we decided] | [WHY - include tradeoffs considered] |
+
+## Interview Insights
+
+Key context that emerged from the planning discussion:
+- **[Insight]**: [Context that informed the design but doesn't fit elsewhere]
+- **[Constraint discovered]**: [Something we learned that shapes implementation]
+- **[User preference]**: [Specific request or preference expressed]
 
 ## Requirements
 
 ### Functional Requirements
-- [Explicit requirement from interview]
+- [Explicit requirement with acceptance criteria]
 
 ### Non-Functional Requirements
-- [Performance, security, etc.]
+- [Performance, security, accessibility, etc. with specific targets]
 
 ## Technical Design
-[Detailed implementation approach]
+
+### Architecture Overview
+[How the pieces fit together]
 
 ### Data Model
-[If applicable]
+[Full schema with field types and examples, not just field names]
+
+### Component/Module Structure
+[What files/modules, their responsibilities, how they interact]
 
 ### API Changes
-[If applicable]
+[Endpoints, signatures, request/response examples]
 
-### UI/UX Behavior
-[Detailed interaction flows]
+## UI/UX Behavior
+
+### User Flows
+[Step-by-step flows for primary scenarios]
+
+### States
+- **Loading**: [What user sees]
+- **Empty**: [What user sees when no data]
+- **Error**: [What user sees on failure]
+- **Success**: [Normal state]
+
+### Interactions
+[Click behaviors, transitions, feedback]
 
 ## Edge Cases & Error Handling
-- **[Scenario]**: [Behavior]
+
+| Scenario | Behavior | Rationale |
+|----------|----------|-----------|
+| [Specific edge case] | [Exactly what happens] | [Why this approach] |
+| [Error condition] | [Recovery behavior] | [Why this fallback] |
+| [Missing data] | [Default behavior] | [Why this default] |
 
 ## Testing Strategy
-- [What to test and how]
+- **Critical path**: [Most important scenario to test]
+- **Edge cases**: [Which edge cases need test coverage]
+- **How to test failures**: [Approach for testing error paths]
 
-## Rollout Plan
-- [Migration, feature flags, etc.]
+## Implementation Notes
+- [Specific patterns to follow from existing codebase]
+- [Gotchas or things to watch out for]
+- [Dependencies or ordering constraints]
+
+## Out of Scope (and why)
+- **[Feature/enhancement]**: Deferred because [specific reason]
+- **[Complexity]**: Not needed for MVP because [reason]
 
 ## Open Questions
-- [Anything still unresolved]
+- [Anything that couldn't be resolved and needs future decision]
 
-## Tradeoffs Accepted
-- **[Tradeoff]**: We chose [A] over [B] because [reason]
+---
+*This is the authoritative implementation spec, developed using `/enrich-plan`.*
 ```
 
 ## Tips for Success
@@ -270,7 +339,7 @@ with the data layer:
 
 [AskUserQuestion with 3 questions about data aggregation, retention, and access patterns]
 
-User: [Provides answers]
+User: [Provides answers - e.g., "90 day retention, aggregate daily, users see only their own data"]
 
 Claude: Good context. The retention policy of 90 days makes sense. Now about
 the UI - I noticed the spec mentions "real-time updates" but doesn't specify
@@ -285,5 +354,16 @@ User: [Provides answers]
 Claude: I think we've covered the major dimensions. Let me write the enriched
 spec back to SPEC.md with all the decisions we've made.
 
-[Writes comprehensive spec]
+[Writes comprehensive spec including:]
+- Key Decisions table with rationale column (e.g., "90-day retention | Balances storage costs with useful history")
+- Interview Insights section (e.g., "User emphasized spouse collaboration - influenced shareable URL decision")
+- Full edge case table (e.g., "No activity data | Show encouraging empty state | New users shouldn't feel broken")
+- UI states (loading, empty, error, success)
+- Implementation notes specific to the codebase
+
+Claude: Would you like me to post this to GitHub issue #42?
+
+User: Yes
+
+[Posts FULL enriched spec as comment, not a summary, using collapsible sections for length]
 ```
