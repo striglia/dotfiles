@@ -77,28 +77,48 @@ Never ask:
 
 ### Phase 2: Interview Loop
 
-Conduct multiple rounds of questioning using `AskUserQuestion`. Each round should:
+Conduct **4-6 rounds** of questioning using `AskUserQuestion`. Blend calibration with topic questions naturally - don't make calibration feel like a separate interrogation.
 
-1. **Focus on a specific dimension** (rotate through these):
-   - Technical implementation approach
-   - Data model and state management
-   - UI/UX behavior and edge cases
-   - Error handling and failure modes
-   - Performance and scalability
-   - Security and privacy
-   - Testing strategy
-   - Migration and rollout
-   - Dependencies and blocking concerns
-   - Future extensibility
+#### Early Questions (Rounds 1-2)
 
-2. **Ask 1-4 questions per round** (use multi-question format)
+Weave in calibration while exploring the most obvious gaps:
+- "What's the riskiest or most uncertain part of this?" (calibration)
+- "How firm is this - validating decisions or exploring options?" (calibration)
+- [First topic question based on obvious gap in the spec]
 
-3. **Build on previous answers** - each round should go deeper based on what was learned
+This surfaces where to spend time. Skip dimensions that don't matter for this feature.
 
-4. **Continue until**:
-   - All critical dimensions are covered
-   - User signals completion
-   - No more non-obvious questions remain
+#### Middle Questions (Rounds 3-4)
+
+Go deeper on high-uncertainty areas. Cover dimensions **proportional to risk**:
+- Technical implementation approach
+- Data model and state management
+- UI/UX behavior and edge cases
+- Error handling and failure modes
+- Performance and scalability
+- Security and privacy
+- Accessibility (if user-facing)
+- Success metrics ("How will we know this worked?")
+- Testing strategy
+- Migration and rollout
+- Dependencies and blocking concerns
+
+#### Handling "I Don't Know" Answers
+
+| Topic Type | Response |
+|------------|----------|
+| Critical path | Push harder - this is a real gap that needs resolution |
+| Nice-to-have | Flag as open question, move on |
+| Repeated vagueness | Switch to recommendations: "Here's what I'd suggest..." |
+
+#### Exit Criteria
+
+Stop when:
+- Critical path decisions are resolved (no blocking "I don't know"s)
+- User signals readiness or fatigue
+- You could explain the feature to a new implementer
+
+**Target: sufficient to implement with confidence, not perfection.**
 
 ### Phase 3: Write Enriched Spec
 
@@ -114,9 +134,9 @@ Conduct multiple rounds of questioning using `AskUserQuestion`. Each round shoul
 
 ### Phase 4: Post Back to GitHub (if applicable)
 
-If the original plan came from a GitHub issue:
+If the original spec came from a GitHub issue, **propose outputting to the same issue**:
 
-1. **Ask user for confirmation**: "Would you like me to post this enriched plan as a comment on issue #X?"
+1. **Ask user for confirmation**: "Would you like me to post this to issue #X? I can either edit the issue body or add as a comment."
 
 2. **If confirmed**, post the COMPLETE enriched spec. Do NOT summarize or compress.
 
@@ -158,7 +178,17 @@ If the original plan came from a GitHub issue:
 
 ## Question Categories
 
-Use these as starting points - always customize based on the specific document:
+Use these as starting points - always customize based on the specific document.
+
+### Which Categories to Prioritize
+
+| Spec Type | High Priority | Lower Priority |
+|-----------|---------------|----------------|
+| Backend/API | Technical, Data, Error Handling, Security | UI/UX, Accessibility |
+| UI Feature | UI/UX, Accessibility, Error Handling | Performance, Migration |
+| Data Migration | Data, Migration, Testing, Error Handling | UI/UX, Accessibility |
+| New Product | Success Metrics, Technical, UI/UX | Migration (none yet) |
+| Bug Fix | Error Handling, Testing | Most others (scope is narrow) |
 
 ### Technical Implementation
 - "The doc mentions X - but what happens when Y occurs simultaneously?"
@@ -205,111 +235,65 @@ Use these as starting points - always customize based on the specific document:
 - "Are there any ordering constraints with other planned work?"
 - "What external systems/APIs does this touch?"
 
+### Accessibility
+- "How will keyboard-only users navigate this?"
+- "What do screen reader users hear at each step?"
+- "Are there color contrast or motion sensitivity concerns?"
+
+### Success Metrics
+- "How will we know this feature succeeded?"
+- "What would make you consider this a failure?"
+- "Are there metrics we should track from day one?"
+
+### Meta-Questions (High Value)
+These often surface better insights than dimension-by-dimension probing:
+- "What are you most uncertain about in this design?"
+- "What part do you expect to be hardest?"
+- "Is there anything you've been assuming that might not be true?"
+- "What would 'good enough' look like for v1?"
+
 ## Interview Best Practices
 
-0. **Use the right tool**: use the AskUserQuestionTool
+1. **Use `AskUserQuestion`** - the right tool for multi-question rounds
+2. **Follow the energy** - if user has strong opinions, explore thoroughly
+3. **Challenge assumptions** - "What if that assumption is wrong?"
+4. **Quantify** - "How many users/requests/items are we talking about?"
+5. **Think adversarially** - what could go wrong? What would a malicious user do?
+6. **Synthesize periodically** - "Let me confirm what we've established..." prevents drift
 
-1. **Start broad, go deep**: First questions establish context, later questions drill into specifics
+## Interview Anti-Patterns
 
-2. **Follow the energy**: If user has strong opinions on a topic, explore it thoroughly
-
-3. **Challenge assumptions**: "You said X - but what if that assumption is wrong?"
-
-4. **Explore alternatives**: "Is there another way to achieve this that we should consider?"
-
-5. **Quantify when possible**: "How many users/requests/items are we talking about?"
-
-6. **Think adversarially**: What could go wrong? What would a malicious user do?
-
-7. **Consider the future**: "If we need to extend this in 6 months, will this design accommodate?"
+Avoid these common mistakes:
+1. **Checklist interrogation** - mechanically asking every category regardless of relevance
+2. **Ignoring signals** - pushing on topics where user is clearly confident/decided
+3. **Premature depth** - diving deep before understanding the overall shape
+4. **Forgetting calibration** - asking detailed questions without knowing what's uncertain
 
 ## Output Format
 
-The enriched spec should include ALL of the following. This format is designed to be **self-sufficient** - a future implementer reading only this document should have everything they need.
+The enriched spec must be **self-sufficient** - a future implementer reading ONLY this document should have everything needed.
+
+**Critical**: Don't omit detail to keep the doc short. Include every decision, rationale, and edge case discussed. Use collapsible sections for length, not truncation.
+
+**Required sections** (include all that apply):
 
 ```markdown
 # [Feature Name]
 
 ## Overview
-[Original or refined overview - what are we building and why]
-
-## Key Decisions
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| [Topic] | [What we decided] | [WHY we decided this - the reasoning from the interview] |
-| [Topic] | [What we decided] | [WHY - include tradeoffs considered] |
-
-## Interview Insights
-
-Key context that emerged from the planning discussion:
-- **[Insight]**: [Context that informed the design but doesn't fit elsewhere]
-- **[Constraint discovered]**: [Something we learned that shapes implementation]
-- **[User preference]**: [Specific request or preference expressed]
-
-## Requirements
-
-### Functional Requirements
-- [Explicit requirement with acceptance criteria]
-
-### Non-Functional Requirements
-- [Performance, security, accessibility, etc. with specific targets]
-
-## Technical Design
-
-### Architecture Overview
-[How the pieces fit together]
-
-### Data Model
-[Full schema with field types and examples, not just field names]
-
-### Component/Module Structure
-[What files/modules, their responsibilities, how they interact]
-
-### API Changes
-[Endpoints, signatures, request/response examples]
-
-## UI/UX Behavior
-
-### User Flows
-[Step-by-step flows for primary scenarios]
-
-### States
-- **Loading**: [What user sees]
-- **Empty**: [What user sees when no data]
-- **Error**: [What user sees on failure]
-- **Success**: [Normal state]
-
-### Interactions
-[Click behaviors, transitions, feedback]
-
-## Edge Cases & Error Handling
-
-| Scenario | Behavior | Rationale |
-|----------|----------|-----------|
-| [Specific edge case] | [Exactly what happens] | [Why this approach] |
-| [Error condition] | [Recovery behavior] | [Why this fallback] |
-| [Missing data] | [Default behavior] | [Why this default] |
-
+## Key Decisions (table: Decision | Choice | Rationale)
+## Interview Insights (context that shaped the design)
+## Requirements (functional + non-functional)
+## Technical Design (architecture, data model, components, APIs)
+## UI/UX Behavior (flows, states: loading/empty/error/success)
+## Edge Cases & Error Handling (table: Scenario | Behavior | Rationale)
 ## Testing Strategy
-- **Critical path**: [Most important scenario to test]
-- **Edge cases**: [Which edge cases need test coverage]
-- **How to test failures**: [Approach for testing error paths]
-
 ## Implementation Notes
-- [Specific patterns to follow from existing codebase]
-- [Gotchas or things to watch out for]
-- [Dependencies or ordering constraints]
-
 ## Out of Scope (and why)
-- **[Feature/enhancement]**: Deferred because [specific reason]
-- **[Complexity]**: Not needed for MVP because [reason]
-
 ## Open Questions
-- [Anything that couldn't be resolved and needs future decision]
 
 ---
-*This is the authoritative implementation spec, developed using `/enrich-plan`.*
+*Authoritative spec developed using `/enrich-plan`.*
 ```
 
 ## Tips for Success
@@ -333,26 +317,33 @@ User: /enrich-plan SPEC.md
 
 [Claude reads SPEC.md, researches codebase]
 
-Claude: I've read the spec for "User Activity Dashboard". The doc covers
-the basic features but I have questions about several areas. Let me start
-with the data layer:
+Claude: I've read the spec for "User Activity Dashboard". Before diving in,
+let me calibrate:
 
-[AskUserQuestion with 3 questions about data aggregation, retention, and access patterns]
+[AskUserQuestion: "What's the riskiest/most uncertain part?" and "How firm is this - validating or exploring?"]
 
-User: [Provides answers - e.g., "90 day retention, aggregate daily, users see only their own data"]
+User: "Most uncertain about the real-time updates - not sure if we need them.
+Pretty firm on everything else, just need to nail down details."
 
-Claude: Good context. The retention policy of 90 days makes sense. Now about
-the UI - I noticed the spec mentions "real-time updates" but doesn't specify
-the behavior:
+Claude: Got it - I'll focus most on the real-time question, lighter touch elsewhere.
+Let's start there:
 
-[AskUserQuestion about real-time behavior, loading states, conflict resolution]
+[AskUserQuestion about real-time: necessity, fallback if dropped, user expectations]
 
-User: [Provides answers]
+User: "Actually, polling every 30s is fine. Real-time was nice-to-have."
 
-[... several more rounds ...]
+Claude: That simplifies things significantly. Quick check on the data layer:
 
-Claude: I think we've covered the major dimensions. Let me write the enriched
-spec back to SPEC.md with all the decisions we've made.
+[AskUserQuestion: retention policy, access patterns - confident answers expected]
+
+User: "90 days, users see only their own data."
+
+Claude: Clear. Since you mentioned the rest is firm, anything I should
+double-check before I write this up?
+
+User: "Nope, looks good."
+
+Claude: Writing the enriched spec now.
 
 [Writes comprehensive spec including:]
 - Key Decisions table with rationale column (e.g., "90-day retention | Balances storage costs with useful history")
