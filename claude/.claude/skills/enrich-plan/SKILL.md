@@ -22,12 +22,28 @@ Invoke when the user has:
 # Enrich a spec file
 /enrich-plan SPEC.md
 
-# Enrich a plan in .claude/plans
+# Enrich a plan in .claude/plans (temporary workspace)
 /enrich-plan .claude/plans/feature-plan.md
 
 # Auto-detect spec file in current directory
 /enrich-plan
 ```
+
+## Important: Plans Are Temporary
+
+**NEVER commit `.claude/plans/*` to version control.**
+
+Plans in `.claude/plans/` are temporary working documents for the current session:
+- They capture interview decisions and context
+- They guide implementation during the session
+- They should be **deleted or gitignored** after implementation
+
+**The authoritative record should live in:**
+- GitHub issue comments (preferred - persistent, linked to work)
+- A dedicated spec file in the repo (e.g., `docs/specs/feature.md`)
+- The PR description
+
+**Why?** Plans are session artifacts with context that becomes stale. GitHub issues are the persistent record that future implementers will actually reference.
 
 ## Core Philosophy
 
