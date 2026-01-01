@@ -31,7 +31,8 @@ The skill handles the complete workflow from start to finish.
 **Explicit invocation**:
 - User says `/git-workflow 42` or `/git-workflow {issue-number}`
 - User says `/git-workflow commit` (when on a feature branch)
-- User says `/git-workflow push` (when ready to create PR)
+- User says `/git-workflow review` (self-review with subagent debate)
+- User says `/git-workflow push` (auto-runs review, then creates PR)
 
 ## Mandatory Rules
 
@@ -44,12 +45,13 @@ The skill handles the complete workflow from start to finish.
 
 ## Core Workflow
 
-The complete workflow has four phases:
+The complete workflow has five phases:
 
 1. **Start**: `/git-workflow {issue-number}` - Create feature branch
 2. **Commit**: `/git-workflow commit` - Stage and commit changes
-3. **Push**: `/git-workflow push` - Push branch and create PR
-4. **Review**: `/fix-pr-feedback` - Address reviewer feedback and iterate
+3. **Review**: `/git-workflow review` - Self-review with subagent debate (auto-runs before push)
+4. **Push**: `/git-workflow push` - Push branch and create PR
+5. **Feedback**: `/fix-pr-feedback` - Address reviewer feedback and iterate
 
 ## Phase 1: Start Working on Issue
 
@@ -139,13 +141,141 @@ The complete workflow has four phases:
 7. **Confirm success**:
    - Display: "✓ Committed: {commit_msg}"
    - Show latest commit: `git log -1 --oneline`
-   - Display: "Next step: /git-workflow push"
+   - Display: "Next step: /git-workflow review (or /git-workflow push which auto-reviews)"
 
-## Phase 3: Push and Create PR
+## Phase 3: Self-Review with Subagent Debate
+
+**When**: User says `/git-workflow review` OR automatically invoked by `/git-workflow push`
+
+**Purpose**: Catch issues before they go to human reviewers. Use AI debate to surface concerns and make deliberate decisions.
+
+**Steps**:
+
+1. **Validate prerequisites**:
+   - Get current branch: `git branch --show-current`
+   - If branch is "main", error: "Nothing to review on main branch."
+   - Extract issue number from branch name
+
+2. **Gather context for review**:
+   - Get the diff: `git diff origin/main..HEAD`
+   - Get the issue details: `gh issue view {issue_num} --json title,body`
+   - Read any changed files in full for context
+
+3. **Launch adversarial subagent debate**:
+
+   Use the Task tool to spawn TWO parallel subagents with opposing perspectives:
+
+   **Subagent A - The Advocate (defend the changes)**:
+   ```
+   You are reviewing code changes for PR readiness. Your role is to ADVOCATE for merging.
+
+   Analyze these changes and argue WHY they should be merged:
+   - How do they solve the issue?
+   - What's good about the implementation?
+   - Why are potential concerns not actually problems?
+
+   Be specific. Reference actual code. Push back on hypothetical issues.
+   ```
+
+   **Subagent B - The Critic (find problems)**:
+   ```
+   You are reviewing code changes for PR readiness. Your role is to be a HARSH CRITIC.
+
+   Analyze these changes and find ALL problems:
+   - Bugs, edge cases, security issues
+   - Code quality issues (naming, structure, complexity)
+   - Missing tests or documentation
+   - Scope creep or incomplete implementation
+   - Deviations from the issue requirements
+
+   Be specific. Reference actual code. Don't hold back.
+   ```
+
+4. **Collect debate results**:
+   - Wait for both subagents to complete
+   - Collect all points raised by each side
+
+5. **Ultrathink deliberation**:
+
+   Use extended thinking to deeply analyze the debate:
+
+   ```
+   Review the advocate's and critic's arguments. For each concern raised:
+
+   1. Is this concern valid given the actual code?
+   2. Does the advocate's counter-argument hold up?
+   3. What is the RIGHT action?
+
+   Classify each concern into one of three buckets:
+
+   FIX NOW - Issues that:
+   - Are bugs or security vulnerabilities
+   - Are quick wins (< 5 min to fix)
+   - Would embarrass us if reviewers found them
+
+   DEFER TO TICKET - Issues that:
+   - Are valid but out of scope for this issue
+   - Require significant work to address
+   - Are improvements, not bugs
+   → Create a GitHub issue to track these
+
+   IGNORE - Issues that:
+   - Are subjective style preferences
+   - Are hypothetical "what ifs" without real risk
+   - Were already considered and intentionally not done
+   ```
+
+6. **Execute decisions**:
+
+   For FIX NOW items:
+   - Make the changes using Edit tool
+   - Stage and amend the commit (if safe) or create new commit:
+     ```bash
+     git add .
+     git commit -m "#{issue_num}: Address self-review feedback
+
+     - {list of fixes made}
+
+     🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+     ```
+
+   For DEFER TO TICKET items:
+   - Create GitHub issues:
+     ```bash
+     gh issue create --title "{concise title}" --body "Discovered during self-review of #{issue_num}.
+
+     {description of the issue}
+
+     Context: This was intentionally deferred from #{issue_num} to keep scope focused."
+     ```
+
+   For IGNORE items:
+   - Document briefly in output why they were ignored
+
+7. **Report results**:
+   - Display: "✓ Self-review complete"
+   - Show summary:
+     ```
+     Self-Review Results:
+       Fixed: {count} issues
+       Deferred: {count} issues (tickets created)
+       Ignored: {count} items
+
+     Ready for: /git-workflow push
+     ```
+
+## Phase 4: Push and Create PR
 
 **When**: User says `/git-workflow push` (must be on a feature branch with commits)
 
 **Steps**:
+
+0. **Auto-invoke self-review** (MANDATORY):
+   - Before any push operations, run Phase 3 (Self-Review with Subagent Debate)
+   - This ensures all code is reviewed before going to human reviewers
+   - Skip only if explicitly invoked with `--skip-review` flag (discouraged)
 
 1. **Validate prerequisites**:
    - Get current branch: `git branch --show-current`
@@ -188,7 +318,7 @@ The complete workflow has four phases:
    - Display: "✓ Created PR: {pr_url}"
    - Display: "Next: Wait for code review, then use `/fix-pr-feedback` to address comments."
 
-## Phase 4: Feedback Loop with Reviewers
+## Phase 5: Feedback Loop with Reviewers
 
 **When**: After PR is created and reviewers provide feedback
 
@@ -311,6 +441,16 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - Generate transcript with `/export-session --gist` before committing (unless `skip-session-transcripts: true` in CLAUDE.md)
 - Include the transcript URL in commit messages for full development context
 - This follows Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
+
+### Self-Review Phase Tips
+
+- **Subagent debate is mandatory** - spawn BOTH advocate and critic in parallel using Task tool
+- **Use extended thinking** for deliberation - this is the "ultrathink" step where you deeply reason about each point
+- **Bias toward the ticket** - when in doubt, the original issue requirements are the tiebreaker
+- **FIX NOW threshold** - if it takes < 5 min and would embarrass you if a reviewer found it, fix it
+- **DEFER liberally** - creating issues is cheap; scope creep is expensive
+- **IGNORE confidently** - not all critic points are valid; document why you're ignoring
+- The goal is catching real problems, not achieving perfection
 
 ## Session Transcript Opt-Out
 
