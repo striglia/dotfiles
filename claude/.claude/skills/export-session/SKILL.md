@@ -26,40 +26,35 @@ Export the current Claude Code session as a shareable HTML transcript using Simo
 
 ## Implementation
 
-This skill is a thin wrapper around Simon Willison's `claude-code-transcripts` tool.
+This skill wraps Simon Willison's `claude-code-transcripts` tool. Since Claude Code runs non-interactively, we must find the session file directly (the `local` subcommand requires an interactive picker).
 
-### For --gist (upload to GitHub Gist):
-
-```bash
-uvx claude-code-transcripts local --gist
-```
-
-This will:
-1. Show a picker to select the session (default: most recent)
-2. Generate HTML transcript
-3. Upload to GitHub Gist
-4. Return a gistpreview.github.io URL
-
-### For --output (local save):
+### Step 1: Find the current session file
 
 ```bash
-uvx claude-code-transcripts local -o <output_dir>
+# Build the project path (replace / with -)
+PROJECT_PATH=$(pwd | sed 's/\//-/g')
+SESSION_DIR="$HOME/.claude/projects/$PROJECT_PATH"
+
+# Get the most recent non-agent session
+SESSION_FILE=$(ls -t "$SESSION_DIR"/*.jsonl 2>/dev/null | grep -v "agent-" | head -1)
+echo "Session: $SESSION_FILE"
 ```
 
-### For current session without picker:
+### Step 2a: For --gist (upload to GitHub Gist):
 
 ```bash
-# Find current session
-PROJECT_DIR=$(pwd | sed 's/\//-/g')
-SESSION_DIR="$HOME/.claude/projects/$PROJECT_DIR"
-LATEST_SESSION=$(ls -t "$SESSION_DIR"/*.jsonl 2>/dev/null | grep -v "agent-" | head -1)
-
-# Convert with gist upload
-uvx claude-code-transcripts json "$LATEST_SESSION" --gist
-
-# Or convert locally
-uvx claude-code-transcripts json "$LATEST_SESSION" -o <output_dir>
+uvx claude-code-transcripts json "$SESSION_FILE" --gist
 ```
+
+Returns a gistpreview.github.io URL.
+
+### Step 2b: For --output (local save):
+
+```bash
+uvx claude-code-transcripts json "$SESSION_FILE" -o <output_dir>
+```
+
+Creates `index.html` and `page-*.html` files in the output directory.
 
 ## Prerequisites
 
