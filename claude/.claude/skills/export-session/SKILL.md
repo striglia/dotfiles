@@ -46,7 +46,7 @@ echo "Session: $SESSION_FILE"
 uvx claude-code-transcripts json "$SESSION_FILE" --gist
 ```
 
-Returns a gistpreview.github.io URL.
+Returns a gisthost.github.io URL (Simon's fork of gistpreview that handles larger files).
 
 ### Step 2b: For --output (local save):
 
@@ -76,10 +76,11 @@ gh auth status || gh auth login
 # Include in commit message:
 git commit -m "Fix mobile chart issues
 
-Transcript: https://gistpreview.github.io/?abc123/index.html"
+Transcript: https://gisthost.github.io/?abc123/index.html"
 ```
 
 ## References
 
 - claude-code-transcripts: https://github.com/simonw/claude-code-transcripts
+- gisthost (gistpreview fork for larger files): https://github.com/simonw/gisthost.github.io
 - Simon's blog post: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
