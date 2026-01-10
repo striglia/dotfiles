@@ -83,6 +83,7 @@ Auto-detect everything possible. Only ask what genuinely cannot be inferred:
    - Type checkers (mypy, tsc)
    - Test runners (pytest, jest, cargo test)
    - Build tools (make, npm scripts, cargo)
+   - **CI/CD** (.github/workflows/, .gitlab-ci.yml, .circleci/)
 
 5. **Find gotchas**:
    - TODO/FIXME comments
@@ -151,6 +152,12 @@ Create or merge content following this structure:
 - {Non-obvious thing 1}
 - {Non-obvious thing 2}
 
+## CI/CD
+
+{CI status: GitHub Actions / GitLab CI / None}
+{What CI runs: tests, lint, type check}
+{Badge if available: ![CI](https://github.com/...)}
+
 ## Dependencies
 
 {Key external services, APIs, or systems this project interacts with}
@@ -213,7 +220,89 @@ Create or merge permissions based on detected tooling:
 
 **Only include permissions for tools that actually exist in the project.**
 
-### Phase 5: Merge with Existing (if applicable)
+### Phase 5: Ensure CI (Default: ON)
+
+**Every project should have automated testing in CI by default.**
+
+1. **Check for existing CI**:
+   - Look for `.github/workflows/*.yml`
+   - Look for `.gitlab-ci.yml`, `.circleci/config.yml`
+   - If found, document in CLAUDE.md and skip creation
+
+2. **If no CI exists, create GitHub Actions workflow**:
+   - Generate `.github/workflows/ci.yml` based on detected stack
+   - Run detected test command (pytest, jest, cargo test, etc.)
+   - Run detected linter if present
+   - Test on appropriate language versions
+
+3. **CI templates by stack**:
+
+   **Python (pytest + ruff + coverage):**
+   ```yaml
+   name: CI
+   on:
+     push:
+       branches: [main]
+     pull_request:
+       branches: [main]
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       strategy:
+         matrix:
+           python-version: ["3.11", "3.12", "3.13"]
+       steps:
+         - uses: actions/checkout@v4
+         - uses: astral-sh/setup-uv@v5
+         - run: uv python install ${{ matrix.python-version }}
+         - run: uv sync --all-extras
+         - name: Run tests with coverage
+           run: uv run pytest --cov=. --cov-report=xml --cov-fail-under=80
+         - name: Upload coverage
+           if: matrix.python-version == '3.11'
+           uses: codecov/codecov-action@v5
+           with:
+             files: ./coverage.xml
+             fail_ci_if_error: false
+     lint:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+         - uses: astral-sh/setup-uv@v5
+         - run: uv python install 3.12
+         - run: uv sync --all-extras
+         - run: uv run ruff check .
+         - run: uv run ruff format --check .
+   ```
+
+   **JavaScript/TypeScript (jest/vitest + coverage):**
+   ```yaml
+   name: CI
+   on:
+     push:
+       branches: [main]
+     pull_request:
+       branches: [main]
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+         - uses: actions/setup-node@v4
+           with:
+             node-version: '20'
+             cache: 'npm'
+         - run: npm ci
+         - run: npm run lint
+         - run: npm test -- --coverage
+         - uses: codecov/codecov-action@v5
+           with:
+             fail_ci_if_error: false
+   ```
+
+4. **Opt-out**: If CLAUDE.md contains `skip-ci-setup: true`, skip this phase.
+
+### Phase 6: Merge with Existing (if applicable)
 
 If CLAUDE.md or settings.local.json already exist:
 
@@ -288,6 +377,7 @@ establish-ai succeeded if:
 2. **No orientation needed** - Key files and patterns are clear without exploration
 3. **Permissions work** - Common commands run without approval dialogs
 4. **Gotchas prevent wasted time** - Non-obvious things are documented
+5. **CI is configured** - Tests run automatically on every PR (unless explicitly opted out)
 
 ## Example Session
 
@@ -328,6 +418,11 @@ Claude: Got it. Creating configuration...
 ✓ Created .claude/settings.local.json with:
   - Python tooling permissions (python, pip)
   - Git permissions
+
+✓ Created .github/workflows/ci.yml with:
+  - pytest on push/PR
+  - ruff linting
+  - Python 3.11+ matrix
 
 You're all set. Claude Code will now be effective from the first interaction.
 ```
