@@ -85,7 +85,12 @@ Auto-detect everything possible. Only ask what genuinely cannot be inferred:
    - Build tools (make, npm scripts, cargo)
    - **CI/CD** (.github/workflows/, .gitlab-ci.yml, .circleci/)
 
-5. **Find gotchas**:
+5. **Check GitHub issues** (if repo has GitHub remote):
+   - Run `gh issue list --limit 20` to see current work
+   - Run `gh milestone list` to see project phases
+   - Include open issues/milestones in CLAUDE.md roadmap section
+
+6. **Find gotchas**:
    - TODO/FIXME comments
    - README warnings
    - Non-obvious configuration
