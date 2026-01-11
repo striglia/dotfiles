@@ -49,7 +49,7 @@ The complete workflow has five phases:
 
 1. **Start**: `/git-workflow {issue-number}` - Create feature branch
 2. **Commit**: `/git-workflow commit` - Stage and commit changes
-3. **Review**: `/git-workflow review` - Self-review with subagent debate (auto-runs before push)
+3. **Review**: `/git-workflow review` - Self-review with subagent debate (MANDATORY)
 4. **Push**: `/git-workflow push` - Push branch and create PR
 5. **Feedback**: `/fix-pr-feedback` - Address reviewer feedback and iterate
 
@@ -91,7 +91,8 @@ The complete workflow has five phases:
      Next steps:
        1. Make your changes
        2. Run: /git-workflow commit
-       3. Run: /git-workflow push
+       3. Run: /git-workflow review
+       4. Run: /git-workflow push
      ```
 
 ## Phase 2: Commit Changes
@@ -141,11 +142,11 @@ The complete workflow has five phases:
 7. **Confirm success**:
    - Display: "✓ Committed: {commit_msg}"
    - Show latest commit: `git log -1 --oneline`
-   - Display: "Next step: /git-workflow review (or /git-workflow push which auto-reviews)"
+   - Display: "Next step: /git-workflow review"
 
 ## Phase 3: Self-Review with Subagent Debate
 
-**When**: User says `/git-workflow review` OR automatically invoked by `/git-workflow push`
+**When**: After commit, before push. This phase is MANDATORY - never skip to push without reviewing first.
 
 **Purpose**: Catch issues before they go to human reviewers.
 
@@ -184,10 +185,9 @@ The complete workflow has five phases:
 
 **Steps**:
 
-0. **Auto-invoke self-review** (MANDATORY):
-   - Before any push operations, invoke `/review-debate` (see Phase 3)
-   - This ensures all code is reviewed before going to human reviewers
-   - Skip only if explicitly invoked with `--skip-review` flag (discouraged)
+0. **Verify review was completed**:
+   - Phase 3 (Review) must have been executed before reaching this phase
+   - If you skipped Phase 3, STOP and go back - do not proceed to push
 
 1. **Validate prerequisites**:
    - Get current branch: `git branch --show-current`
