@@ -147,7 +147,7 @@ The complete workflow has five phases:
 
 **When**: User says `/git-workflow review` OR automatically invoked by `/git-workflow push`
 
-**Purpose**: Catch issues before they go to human reviewers. Use AI debate to surface concerns and make deliberate decisions.
+**Purpose**: Catch issues before they go to human reviewers.
 
 **Steps**:
 
@@ -156,115 +156,27 @@ The complete workflow has five phases:
    - If branch is "main", error: "Nothing to review on main branch."
    - Extract issue number from branch name
 
-2. **Gather context for review**:
-   - Get the diff: `git diff origin/main..HEAD`
-   - Get the issue details: `gh issue view {issue_num} --json title,body`
-   - Read any changed files in full for context
+2. **Invoke the review-debate skill**:
 
-3. **Launch adversarial subagent debate**:
-
-   Use the Task tool to spawn TWO parallel subagents with opposing perspectives:
-
-   **Subagent A - The Advocate (defend the changes)**:
+   Run `/review-debate` with context:
    ```
-   You are reviewing code changes for PR readiness. Your role is to ADVOCATE for merging.
+   /review-debate
 
-   Analyze these changes and argue WHY they should be merged:
-   - How do they solve the issue?
-   - What's good about the implementation?
-   - Why are potential concerns not actually problems?
-
-   Be specific. Reference actual code. Push back on hypothetical issues.
+   Context: Code changes for issue #{issue_num}: {issue_title}
    ```
 
-   **Subagent B - The Critic (find problems)**:
-   ```
-   You are reviewing code changes for PR readiness. Your role is to be a HARSH CRITIC.
+   The review-debate skill handles:
+   - Gathering the diff and issue context
+   - Spawning parallel Advocate and Critic subagents
+   - Synthesizing their debate into FIX NOW / DEFER / IGNORE buckets
+   - Making quick fixes and creating deferred issues
+   - Reporting results
 
-   Analyze these changes and find ALL problems:
-   - Bugs, edge cases, security issues
-   - Code quality issues (naming, structure, complexity)
-   - Missing tests or documentation
-   - Scope creep or incomplete implementation
-   - Deviations from the issue requirements
+   See `/review-debate` skill documentation for full details on the adversarial debate pattern.
 
-   Be specific. Reference actual code. Don't hold back.
-   ```
-
-4. **Collect debate results**:
-   - Wait for both subagents to complete
-   - Collect all points raised by each side
-
-5. **Ultrathink deliberation**:
-
-   Use extended thinking to deeply analyze the debate:
-
-   ```
-   Review the advocate's and critic's arguments. For each concern raised:
-
-   1. Is this concern valid given the actual code?
-   2. Does the advocate's counter-argument hold up?
-   3. What is the RIGHT action?
-
-   Classify each concern into one of three buckets:
-
-   FIX NOW - Issues that:
-   - Are bugs or security vulnerabilities
-   - Are quick wins (< 5 min to fix)
-   - Would embarrass us if reviewers found them
-
-   DEFER TO TICKET - Issues that:
-   - Are valid but out of scope for this issue
-   - Require significant work to address
-   - Are improvements, not bugs
-   → Create a GitHub issue to track these
-
-   IGNORE - Issues that:
-   - Are subjective style preferences
-   - Are hypothetical "what ifs" without real risk
-   - Were already considered and intentionally not done
-   ```
-
-6. **Execute decisions**:
-
-   For FIX NOW items:
-   - Make the changes using Edit tool
-   - Stage and amend the commit (if safe) or create new commit:
-     ```bash
-     git add .
-     git commit -m "#{issue_num}: Address self-review feedback
-
-     - {list of fixes made}
-
-     🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
-     ```
-
-   For DEFER TO TICKET items:
-   - Create GitHub issues:
-     ```bash
-     gh issue create --title "{concise title}" --body "Discovered during self-review of #{issue_num}.
-
-     {description of the issue}
-
-     Context: This was intentionally deferred from #{issue_num} to keep scope focused."
-     ```
-
-   For IGNORE items:
-   - Document briefly in output why they were ignored
-
-7. **Report results**:
+3. **Confirm completion**:
    - Display: "✓ Self-review complete"
-   - Show summary:
-     ```
-     Self-Review Results:
-       Fixed: {count} issues
-       Deferred: {count} issues (tickets created)
-       Ignored: {count} items
-
-     Ready for: /git-workflow push
-     ```
+   - Display: "Ready for: /git-workflow push"
 
 ## Phase 4: Push and Create PR
 
@@ -273,7 +185,7 @@ The complete workflow has five phases:
 **Steps**:
 
 0. **Auto-invoke self-review** (MANDATORY):
-   - Before any push operations, run Phase 3 (Self-Review with Subagent Debate)
+   - Before any push operations, invoke `/review-debate` (see Phase 3)
    - This ensures all code is reviewed before going to human reviewers
    - Skip only if explicitly invoked with `--skip-review` flag (discouraged)
 
@@ -444,13 +356,10 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 ### Self-Review Phase Tips
 
-- **Subagent debate is mandatory** - spawn BOTH advocate and critic in parallel using Task tool
-- **Use extended thinking** for deliberation - this is the "ultrathink" step where you deeply reason about each point
-- **Bias toward the ticket** - when in doubt, the original issue requirements are the tiebreaker
-- **FIX NOW threshold** - if it takes < 5 min and would embarrass you if a reviewer found it, fix it
-- **DEFER liberally** - creating issues is cheap; scope creep is expensive
-- **IGNORE confidently** - not all critic points are valid; document why you're ignoring
-- The goal is catching real problems, not achieving perfection
+See `/review-debate` skill for detailed guidance on:
+- Spawning parallel Advocate and Critic subagents
+- Synthesizing debate into actionable decisions
+- FIX NOW vs DEFER vs IGNORE classification criteria
 
 ## Session Transcript Opt-Out
 
