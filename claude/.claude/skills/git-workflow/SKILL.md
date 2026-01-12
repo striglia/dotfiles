@@ -41,7 +41,7 @@ The skill handles the complete workflow from start to finish.
 3. **ALWAYS use proper commit message format: `#{number}: {title}`**
 4. **ALWAYS create a Pull Request - never merge without PR**
 5. **ALWAYS include "Closes #{number}" in PR body**
-6. **Export session transcript** with `/export-session --gist` and include URL in commit message (default: ON, opt-out via CLAUDE.md)
+6. **Export session transcript** on initial commit only - run `/export-session --gist` and include URL in commit message (default: ON, opt-out via CLAUDE.md). Follow-up commits (via `/fix-pr-feedback` or manual) do not include transcripts.
 
 ## Core Workflow
 
@@ -118,20 +118,41 @@ The complete workflow has five phases:
 4. **Stage all changes**:
    - Run: `git add .`
 
-5. **Generate transcript** (default: ON):
-   - First, check if CLAUDE.md contains `skip-session-transcripts: true`
-   - If opt-out is set, skip this step
-   - Otherwise, run: `/export-session --gist` to upload session transcript
-   - Capture the gistpreview.github.io URL from output
-   - This creates a permanent record of the development session
+5. **Run format verification** (belt and suspenders):
+   - PostToolUse hooks should have formatted files, but verify to catch race conditions
+   - Detect project type and run appropriate formatter:
+     - If `package.json` exists: `npm run format 2>/dev/null || npx prettier --write . 2>/dev/null`
+     - If `Cargo.toml` or `src-tauri/Cargo.toml` exists: `cargo fmt`
+     - If `pyproject.toml` exists: `ruff format . 2>/dev/null || black . 2>/dev/null`
+   - Re-stage if formatters made changes: `git add .`
+   - This prevents CI failures from formatting issues that slipped through hooks
 
-6. **Create commit**:
+6. **Generate transcript** (default: ON, initial commit only):
+   - Skip this step if this is a follow-up commit (branch already has commits ahead of main)
+   - Check if branch has prior commits: `git rev-list --count origin/main..HEAD`
+   - If count > 0, skip transcript generation - this is a follow-up commit
+   - If count == 0 (first commit on branch):
+     - Check if CLAUDE.md contains `skip-session-transcripts: true`
+     - If opt-out is set, skip this step
+     - Otherwise, run: `/export-session --gist` to upload session transcript
+     - Capture the gist URL from output
+     - This creates a permanent record of the initial development session
+
+7. **Create commit**:
    - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
-   - Format commit message with transcript link:
+   - Format commit message (with transcript if this is the first commit):
      ```
      #{issue_num}: {issue_title}
 
-     Transcript: {gistpreview_url}
+     Transcript: {gist_url}  # Only on initial commit
+
+     🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+     ```
+   - For follow-up commits (no transcript):
+     ```
+     #{issue_num}: {description of changes}
 
      🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -139,7 +160,7 @@ The complete workflow has five phases:
      ```
    - Run: `git commit -m "{commit_msg}"`
 
-7. **Confirm success**:
+8. **Confirm success**:
    - Display: "✓ Committed: {commit_msg}"
    - Show latest commit: `git log -1 --oneline`
    - Display: "Next step: /git-workflow review"
@@ -294,13 +315,22 @@ The complete workflow has five phases:
 
 ## Commit Message Format
 
-**Format**: `#{issue-number}: {issue-title}`
+**Format**: `#{issue-number}: {title-or-description}`
 
-**With transcript** (default, unless opted out):
+**Initial commit** (with transcript, unless opted out):
 ```
 #{issue-number}: {issue-title}
 
-Transcript: https://gistpreview.github.io/?{gist-id}/index.html
+Transcript: {gist-url}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
+**Follow-up commits** (no transcript):
+```
+#{issue-number}: {description of changes}
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -308,15 +338,16 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 **Examples**:
-- `#8: Fix wasteful test process and auto-run behavior`
-- `#42: Add user authentication`
-- `#123: Update API to use GraphQL instead of REST`
+- Initial: `#8: Fix wasteful test process and auto-run behavior` (with transcript)
+- Follow-up: `#8: Fix formatting for CI` (no transcript)
+- Follow-up: `#8: Address review feedback on error handling` (no transcript)
 
 **Why this format**:
 - GitHub automatically links to issue
 - Clear traceability
 - Consistent across all commits in the project
-- Transcript link provides full context of LLM-assisted development (à la Simon Willison)
+- Transcript link on initial commit provides full context of LLM-assisted development (à la Simon Willison)
+- Follow-up commits don't need separate transcripts - they're part of the same PR context
 
 ## Error Handling
 
@@ -350,8 +381,9 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - Issue number is the single source of truth (stored in branch name)
 - Multiple commits to same branch are fine - all will be included in PR
 - If user is already on a feature branch, detect issue number automatically
-- Generate transcript with `/export-session --gist` before committing (unless `skip-session-transcripts: true` in CLAUDE.md)
-- Include the transcript URL in commit messages for full development context
+- Generate transcript with `/export-session --gist` on the **initial commit only** (unless `skip-session-transcripts: true` in CLAUDE.md)
+- Include the transcript URL in the first commit message for full development context
+- Follow-up commits (fixes, feedback responses) don't need transcripts - they're part of the same PR
 - This follows Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
 
 ### Self-Review Phase Tips
