@@ -408,6 +408,19 @@ This prevents CI failures by auto-formatting files after Claude edits them.
    - Prevents CI failures from formatting issues
    ```
 
+**Important limitation:** PostToolUse hooks run after each individual Edit/Write, but there can be race conditions when committing multiple files quickly. The hooks are a first line of defense, but **git-workflow should also verify formatting before commits**.
+
+7. **Add pre-commit verification to workflow** (belt and suspenders):
+
+   The `/git-workflow` skill should run format checks before committing:
+   ```bash
+   # Before git commit, verify formatting passes
+   npm run lint 2>/dev/null || npm run format
+   cargo fmt --manifest-path src-tauri/Cargo.toml 2>/dev/null || true
+   ```
+
+   This catches any files that slipped through the PostToolUse hooks due to timing issues.
+
 **Opt-out**: If CLAUDE.md contains `skip-format-hooks: true`, skip this phase.
 
 **Hook configuration location options**:
