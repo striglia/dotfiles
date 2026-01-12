@@ -307,7 +307,115 @@ Create or merge permissions based on detected tooling:
 
 4. **Opt-out**: If CLAUDE.md contains `skip-ci-setup: true`, skip this phase.
 
-### Phase 6: Merge with Existing (if applicable)
+### Phase 6: Configure Auto-Formatting Hooks
+
+**Every project with CI format checks should have matching Claude Code hooks.**
+
+This prevents CI failures by auto-formatting files after Claude edits them.
+
+1. **Detect formatters from CI and tooling**:
+   - Check CI workflow for format checks (`cargo fmt`, `prettier`, `black`, `ruff format`)
+   - Check package.json scripts for lint/format commands
+   - Check for formatter config files (`.prettierrc`, `pyproject.toml`, `rustfmt.toml`)
+
+2. **Create hook script** at `.claude/hooks/format-on-edit.sh`:
+
+   **Multi-language template:**
+   ```bash
+   #!/bin/bash
+   # Auto-format files after Claude edits them
+
+   file_path=$(jq -r '.tool_input.file_path // empty' 2>/dev/null)
+   [[ -z "$file_path" ]] && exit 0
+
+   cd "$CLAUDE_PROJECT_DIR" || exit 0
+
+   # Rust (if Cargo.toml exists)
+   if [[ "$file_path" =~ \.rs$ ]] && [[ -f "Cargo.toml" || -f "src-tauri/Cargo.toml" ]]; then
+     manifest=$(find . -name "Cargo.toml" -not -path "*/target/*" | head -1)
+     cargo fmt --manifest-path "$manifest" 2>/dev/null && echo "Formatted Rust"
+     exit 0
+   fi
+
+   # Python (if pyproject.toml or requirements.txt exists)
+   if [[ "$file_path" =~ \.py$ ]]; then
+     if command -v ruff &>/dev/null; then
+       ruff format "$file_path" 2>/dev/null && echo "Formatted Python (ruff)"
+     elif command -v black &>/dev/null; then
+       black "$file_path" 2>/dev/null && echo "Formatted Python (black)"
+     fi
+     exit 0
+   fi
+
+   # JavaScript/TypeScript/Web (if package.json exists)
+   if [[ "$file_path" =~ \.(ts|tsx|js|jsx|svelte|vue|css|html|json|md|yaml|yml)$ ]]; then
+     if [[ -f "node_modules/.bin/prettier" ]]; then
+       npx prettier --write "$file_path" 2>/dev/null && echo "Formatted: $(basename "$file_path")"
+     fi
+     exit 0
+   fi
+
+   # Go
+   if [[ "$file_path" =~ \.go$ ]]; then
+     gofmt -w "$file_path" 2>/dev/null && echo "Formatted Go"
+     exit 0
+   fi
+
+   exit 0
+   ```
+
+3. **Create hook configuration** at `.claude/settings.json`:
+   ```json
+   {
+     "hooks": {
+       "PostToolUse": [
+         {
+           "matcher": "Edit|Write",
+           "hooks": [
+             {
+               "type": "command",
+               "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format-on-edit.sh",
+               "timeout": 60
+             }
+           ]
+         }
+       ]
+     }
+   }
+   ```
+
+4. **Make hook executable**:
+   ```bash
+   chmod +x .claude/hooks/format-on-edit.sh
+   ```
+
+5. **Test hook end-to-end**:
+   ```bash
+   # Test with a file from the project
+   echo '{"tool_input": {"file_path": "/path/to/test.ts"}}' | \
+     CLAUDE_PROJECT_DIR=/path/to/project \
+     /bin/bash /path/to/project/.claude/hooks/format-on-edit.sh
+   ```
+
+   Verify output shows formatting message.
+
+6. **Document in CLAUDE.md**:
+   ```markdown
+   ## Claude Code Hooks
+
+   Auto-formatting is configured in `.claude/settings.json`:
+   - **PostToolUse (Edit|Write)**: Runs formatters after file edits
+   - Prevents CI failures from formatting issues
+   ```
+
+**Opt-out**: If CLAUDE.md contains `skip-format-hooks: true`, skip this phase.
+
+**Hook configuration location options**:
+- `.claude/settings.json` - Project-specific, committed to repo (recommended)
+- `.claude/settings.local.json` - Local-only, not committed
+- `~/.claude/settings.json` - User-wide, applies to all projects
+
+### Phase 7: Merge with Existing (if applicable)
 
 If CLAUDE.md or settings.local.json already exist:
 
@@ -383,6 +491,7 @@ establish-ai succeeded if:
 3. **Permissions work** - Common commands run without approval dialogs
 4. **Gotchas prevent wasted time** - Non-obvious things are documented
 5. **CI is configured** - Tests run automatically on every PR (unless explicitly opted out)
+6. **Hooks prevent CI failures** - Auto-formatting runs after edits to match CI checks
 
 ## Example Session
 
@@ -428,6 +537,13 @@ Claude: Got it. Creating configuration...
   - pytest on push/PR
   - ruff linting
   - Python 3.11+ matrix
+
+✓ Created .claude/hooks/format-on-edit.sh with:
+  - Auto-runs ruff format after Python file edits
+  - Prevents CI format check failures
+
+✓ Created .claude/settings.json with:
+  - PostToolUse hook for Edit|Write
 
 You're all set. Claude Code will now be effective from the first interaction.
 ```
