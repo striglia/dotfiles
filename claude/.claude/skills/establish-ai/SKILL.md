@@ -428,7 +428,138 @@ This prevents CI failures by auto-formatting files after Claude edits them.
 - `.claude/settings.local.json` - Local-only, not committed
 - `~/.claude/settings.json` - User-wide, applies to all projects
 
-### Phase 7: Merge with Existing (if applicable)
+### Phase 7: Architecture Document (Optional but Recommended)
+
+**Every non-trivial project benefits from an ARCHITECTURE.md** that describes design philosophy and key patterns for LLMs.
+
+This is different from CLAUDE.md:
+- **CLAUDE.md** = operational (commands, conventions, gotchas)
+- **ARCHITECTURE.md** = philosophical (why things are built this way, core principles)
+
+1. **Ask if user wants an ARCHITECTURE.md**:
+   ```
+   [AskUserQuestion]
+   Question: "Would you like to create an ARCHITECTURE.md?"
+   Options:
+   - "Yes - this project has meaningful architectural decisions" (Recommended)
+   - "No - this is a simple/utility project"
+   ```
+
+2. **If yes, gather architectural concepts through interview**:
+
+   Use AskUserQuestion to understand the key architectural elements. Ask 2-4 questions based on what you detected in Phase 1:
+
+   ```
+   [AskUserQuestion - adapt based on project type]
+
+   Question 1: "What is this project's core design philosophy in one sentence?"
+   - Example: "Modular platform where each component solves one problem"
+   - Example: "Local-first, single-user personal tool"
+
+   Question 2: "What are the 2-3 most important architectural principles?"
+   - Example: "SQLite for structure, filesystem for blobs"
+   - Example: "Non-blocking captures are critical - never block main thread"
+
+   Question 3: "What are explicit non-goals?" (things you intentionally won't do)
+   - Example: "Multi-user support, real-time collaboration"
+   - Example: "Mobile native apps, plugin architecture"
+
+   Question 4 (if applicable): "What patterns should LLMs understand before making changes?"
+   - Example: "All API calls must go through the service layer"
+   - Example: "Commands are sync, Events are async"
+   ```
+
+3. **Generate ARCHITECTURE.md** following this structure:
+
+   ```markdown
+   # {Project Name} Architecture
+
+   This is an evergreen document describing the core design philosophy. **Every LLM working on this codebase should read this first.** Update this document as the architecture evolves.
+
+   ## What {Project Name} Is
+
+   {One paragraph explaining what the project is and isn't - from user's answer}
+
+   ## Core Principles
+
+   ### 1. {Principle Name}
+
+   {Detailed explanation of the principle}
+
+   **Why this matters:**
+   {Rationale}
+
+   **Example:**
+   {Code or pattern example if applicable}
+
+   ### 2. {Principle Name}
+   ...
+
+   ## Technology Stack
+
+   | Layer | Technology | Purpose |
+   |-------|------------|---------|
+   | {layer} | {tech} | {why} |
+
+   ## Key Patterns
+
+   ### {Pattern Name}
+
+   {Description of the pattern and how it's used in this codebase}
+
+   ```{language}
+   // Code example showing the pattern
+   ```
+
+   ## Current State
+
+   {What's built, what's working, what's next}
+
+   ## Non-Goals
+
+   Things we explicitly won't do:
+
+   - **{Non-goal}** - {reason}
+   - **{Non-goal}** - {reason}
+
+   ## For LLMs Working Here
+
+   When making changes:
+
+   1. **Read this document first** - Understand the philosophy before writing code
+   2. {Specific guideline from patterns}
+   3. {Specific guideline from patterns}
+   4. **Update this doc** - If you make architectural decisions, record them here
+   ```
+
+4. **Add reference in CLAUDE.md**:
+
+   After creating ARCHITECTURE.md, add to CLAUDE.md:
+   ```markdown
+   ## Architecture
+
+   See [ARCHITECTURE.md](./ARCHITECTURE.md) for design philosophy and core principles.
+   ```
+
+   Or if there's already an Architecture section, add the reference there.
+
+5. **Location**: Place ARCHITECTURE.md at:
+   - Root directory (preferred for most projects)
+   - `docs/ARCHITECTURE.md` (if project uses docs/ folder)
+
+**When to skip**:
+- Simple utility tools (like single-file HTML tools)
+- Scripts and small automation
+- Projects where CLAUDE.md's Architecture section is sufficient
+- User explicitly declines
+
+**Examples of good ARCHITECTURE.md candidates**:
+- Multi-module platforms (Exocortex pattern)
+- Desktop apps with complex data flows (Loupe pattern)
+- APIs with specific design constraints
+- Projects with non-obvious architectural decisions
+
+### Phase 8: Merge with Existing (if applicable)
 
 If CLAUDE.md or settings.local.json already exist:
 
@@ -505,6 +636,7 @@ establish-ai succeeded if:
 4. **Gotchas prevent wasted time** - Non-obvious things are documented
 5. **CI is configured** - Tests run automatically on every PR (unless explicitly opted out)
 6. **Hooks prevent CI failures** - Auto-formatting runs after edits to match CI checks
+7. **Architecture is documented** - For non-trivial projects, ARCHITECTURE.md captures design philosophy
 
 ## Example Session
 
@@ -558,6 +690,26 @@ Claude: Got it. Creating configuration...
 ✓ Created .claude/settings.json with:
   - PostToolUse hook for Edit|Write
 
+[AskUserQuestion: "Would you like to create an ARCHITECTURE.md?"]
+Options:
+- "Yes - this project has meaningful architectural decisions" (Recommended)
+- "No - this is a simple/utility project"
+
+User: "Yes"
+
+[AskUserQuestion: Interview questions about architecture...]
+
+User: Answers about design philosophy, principles, non-goals...
+
+✓ Created ARCHITECTURE.md with:
+  - Core design philosophy
+  - Key principles (modular platform, different data stores, durability over features)
+  - Technology stack table
+  - Non-goals section
+  - Guidelines for LLMs
+
+✓ Updated CLAUDE.md with reference to ARCHITECTURE.md
+
 You're all set. Claude Code will now be effective from the first interaction.
 ```
 
@@ -570,6 +722,8 @@ You're all set. Claude Code will now be effective from the first interaction.
 5. **Respect existing work** - merge, don't overwrite
 6. **Keep permissions minimal** - only what's actually used in this project
 7. **Test your output mentally** - could you implement a feature with just this CLAUDE.md?
+8. **ARCHITECTURE.md is for philosophy** - principles, patterns, non-goals; not commands or file listings
+9. **Suggest ARCHITECTURE.md for complex projects** - if you detect multiple modules, significant data flows, or non-obvious constraints, recommend it
 
 ## Error Handling
 
