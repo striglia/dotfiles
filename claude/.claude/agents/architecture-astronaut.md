@@ -48,3 +48,15 @@ Example: `app/briefing/sources/oura.py` uses Oura API concepts (daily_sleep, dai
 - Client-specific data structures in provider code
 - Provider that makes assumptions about how data will be used
 - Missing documentation on WHY certain data is included/excluded at the client level
+
+## Cross-Verification with ARCHITECTURE.md
+
+**Always check for an ARCHITECTURE.md file at project root or docs/.** This document contains the project's specific design philosophy and principles.
+
+When reviewing architecture:
+1. Read ARCHITECTURE.md first if it exists
+2. Cross-verify your recommendations against the project's stated principles
+3. Flag any conflicts between your analysis and ARCHITECTURE.md
+4. If ARCHITECTURE.md is outdated or contradicts good practice, note this explicitly
+
+The principles in this agent definition are general guidelines. Project-specific ARCHITECTURE.md takes precedence for that project's domain decisions. When in doubt, defer to the documented project architecture and suggest updates if needed.
