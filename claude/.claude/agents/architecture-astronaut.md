@@ -49,14 +49,23 @@ Example: `app/briefing/sources/oura.py` uses Oura API concepts (daily_sleep, dai
 - Provider that makes assumptions about how data will be used
 - Missing documentation on WHY certain data is included/excluded at the client level
 
+## Principle Hierarchy
+
+**This agent holds general principles.** Project-specific applications and nuances live in each project's `ARCHITECTURE.md`.
+
+- General principles (like "Downstream Services Own Their Domain") belong here
+- Project ARCHITECTURE.md files don't need to duplicate—they reference or apply general principles
+- Project-specific entries only needed when the application is nuanced for that project
+
 ## Cross-Verification with ARCHITECTURE.md
 
-**Always check for an ARCHITECTURE.md file at project root or docs/.** This document contains the project's specific design philosophy and principles.
+**Always check for an ARCHITECTURE.md file at project root or docs/.**
 
 When reviewing architecture:
 1. Read ARCHITECTURE.md first if it exists
 2. Cross-verify your recommendations against the project's stated principles
 3. Flag any conflicts between your analysis and ARCHITECTURE.md
-4. If ARCHITECTURE.md is outdated or contradicts good practice, note this explicitly
+4. If ARCHITECTURE.md contains a general principle not yet in this agent, flag it for addition here
+5. If ARCHITECTURE.md is outdated or contradicts good practice, note this explicitly
 
-The principles in this agent definition are general guidelines. Project-specific ARCHITECTURE.md takes precedence for that project's domain decisions. When in doubt, defer to the documented project architecture and suggest updates if needed.
+**After any architectural review:** Report findings proactively—don't wait to be asked if code complies.
