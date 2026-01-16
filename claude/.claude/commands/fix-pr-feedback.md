@@ -1,11 +1,11 @@
 ---
-description: "Address PR review feedback by making wise decisions, implementing selected fixes, and documenting rationale in PR comments"
+description: "Make PR ready for merge: resolve merge conflicts, fix failing CI/tests, address review feedback, and document all decisions"
 allowed-tools: ["Bash", "Read", "Write", "Edit", "Grep", "Glob"]
 ---
 
 # Fix PR Feedback
 
-Fetches PR review comments and feedback since the last commit, makes wise decisions about what to implement, systematically addresses selected feedback with focused commits, and documents all decisions in a PR comment.
+Makes a PR ready for merge by addressing all blocking issues: merge conflicts, failing CI/tests, and review feedback. Makes wise decisions about what to implement, systematically addresses issues with focused commits, and documents all decisions in a PR comment.
 
 Usage: `/fix-pr-feedback [pr-url]`
 
@@ -16,15 +16,16 @@ Examples:
 This command will:
 1. Extract PR number from the URL
 2. Verify you're on the correct branch for the PR
-3. Check for failing CI/test runs and investigate failures
-4. Fetch all PR review comments and feedback
-5. Filter for feedback newer than the last commit
-6. Check GitHub issues to see what's already planned
-7. Analyze and make wise decisions about what to implement
-8. Implement selected fixes systematically
-9. Create focused commits for each category of fixes
-10. Push the updates
-11. Comment on the PR explaining what was done and why
+3. **Check for and resolve merge conflicts** (rebase or merge from base branch)
+4. Check for failing CI/test runs and investigate failures
+5. Fetch all PR review comments and feedback
+6. Filter for feedback newer than the last commit
+7. Check GitHub issues to see what's already planned
+8. Analyze and make wise decisions about what to implement
+9. Implement selected fixes systematically
+10. Create focused commits for each category of fixes
+11. Push the updates
+12. Comment on the PR explaining what was done and why
 
 Prerequisites:
 - Must have checked out the PR branch locally
@@ -93,7 +94,40 @@ echo "✓ On correct branch: $current_branch"
 SCRIPT
 ```
 
-## Step 3: Check for Failing CI/Test Runs
+## Step 3: Check for and Resolve Merge Conflicts
+
+```bash
+bash << 'SCRIPT'
+# Get the base branch for this PR
+base_branch=$(gh pr view "$pr_number" --json baseRefName -q .baseRefName)
+echo "Base branch: $base_branch"
+
+# Fetch latest from origin
+git fetch origin "$base_branch"
+
+# Check if PR is mergeable
+mergeable=$(gh pr view "$pr_number" --json mergeable -q .mergeable)
+echo "Mergeable status: $mergeable"
+
+if [ "$mergeable" = "CONFLICTING" ]; then
+  echo "⚠️ Merge conflicts detected with $base_branch"
+  echo "MERGE_CONFLICTS=true"
+else
+  echo "✓ No merge conflicts"
+  echo "MERGE_CONFLICTS=false"
+fi
+SCRIPT
+```
+
+**Action:** If merge conflicts are detected, I will:
+1. Merge the base branch into the feature branch: `git merge origin/<base_branch>`
+2. Identify conflicting files from git status
+3. Read each conflicting file to understand the conflict
+4. Resolve conflicts by understanding both sides and making the correct choice
+5. Stage resolved files and complete the merge commit
+6. Verify the merge was successful and tests still pass
+
+## Step 4: Check for Failing CI/Test Runs
 
 ```bash
 bash << 'SCRIPT'
@@ -132,7 +166,7 @@ SCRIPT
 4. Verify fixes locally with `npm test` if applicable
 5. Commit and push the fix before proceeding with review feedback
 
-## Step 4: Fetch All PR Feedback
+## Step 5: Fetch All PR Feedback
 
 ```bash
 gh pr view "$pr_number" \
@@ -159,7 +193,7 @@ gh pr view "$pr_number" \
   }' > /tmp/pr-feedback-$pr_number.json
 ```
 
-## Step 5: Filter for Feedback Since Last Commit
+## Step 6: Filter for Feedback Since Last Commit
 
 ```bash
 bash << 'SCRIPT'
@@ -185,7 +219,7 @@ echo "Found $new_count new feedback items"
 SCRIPT
 ```
 
-## Step 6: Filter Out Non-Actionable Comments
+## Step 7: Filter Out Non-Actionable Comments
 
 ```bash
 bash << 'SCRIPT'
@@ -210,7 +244,7 @@ echo "Filtered to $actionable_count actionable items"
 SCRIPT
 ```
 
-## Step 7: Display Actionable Feedback
+## Step 8: Display Actionable Feedback
 
 ```bash
 jq -r '
@@ -244,7 +278,7 @@ jq -r '
 ' /tmp/actionable-feedback-$pr_number.json
 ```
 
-## Step 8: Check GitHub Issues for Planned Work
+## Step 9: Check GitHub Issues for Planned Work
 
 ```bash
 gh issue list --limit 50 --json number,title,state,labels --jq '.[] | "#\(.number): \(.title) [\(.state)]"'
@@ -252,7 +286,7 @@ gh issue list --limit 50 --json number,title,state,labels --jq '.[] | "#\(.numbe
 
 This helps avoid implementing feedback that's already tracked in issues for future work.
 
-## Step 9: Analyze Feedback and Make Wise Decisions
+## Step 10: Analyze Feedback and Make Wise Decisions
 
 I will now:
 1. Read and understand all feedback items
@@ -270,7 +304,7 @@ I will now:
 4. Identify dependencies between selected fixes
 5. Plan the order of implementation
 
-## Step 10: Implement Selected Fixes
+## Step 11: Implement Selected Fixes
 
 For each selected feedback item:
 1. Locate the relevant files using Grep/Read
@@ -286,7 +320,7 @@ For each selected feedback item:
 5. Run tests locally to confirm fixes work
 6. Group related fixes together
 
-## Step 11: Create Focused Commits
+## Step 12: Create Focused Commits
 
 ```bash
 # For each logical group of fixes:
@@ -303,7 +337,7 @@ Addresses feedback from: <reviewer-names>
 Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ```
 
-## Step 12: Push Updates
+## Step 13: Push Updates
 
 ```bash
 git push
@@ -311,7 +345,7 @@ echo "✓ Pushed updates to PR #$pr_number"
 echo "✓ View PR: $pr_url"
 ```
 
-## Step 13: Comment on PR with Decision Summary
+## Step 14: Comment on PR with Decision Summary
 
 CRITICAL: Always post a comment explaining what was done and why.
 
