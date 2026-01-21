@@ -30,9 +30,12 @@ The skill handles the complete workflow from start to finish.
 
 **Explicit invocation**:
 - User says `/git-workflow 42` or `/git-workflow {issue-number}`
+- User says `/git-workflow 42 --worktree` (create branch in a new worktree)
 - User says `/git-workflow commit` (when on a feature branch)
 - User says `/git-workflow review` (self-review with subagent debate)
 - User says `/git-workflow push` (auto-runs review, then creates PR)
+- User says `/git-workflow worktree list` (show all worktrees)
+- User says `/git-workflow worktree remove {path}` (clean up a worktree)
 
 ## Mandatory Rules
 
@@ -57,6 +60,10 @@ The complete workflow has five phases:
 
 **When**: User provides an issue number (e.g., `/git-workflow 42`)
 
+**Modes**:
+- **In-place** (default): Creates branch in current repo, checks it out
+- **Worktree**: Creates branch in a new worktree directory for parallel work
+
 **Steps**:
 
 1. **Validate prerequisites**:
@@ -74,7 +81,16 @@ The complete workflow has five phases:
    - Display: "Issue #{issue_num}: {title}" and "State: {state}"
    - If state is "CLOSED", warn: "Warning: This issue is already closed."
 
-4. **Create feature branch**:
+4. **Determine worktree mode**:
+   - If user passed `--worktree` flag: use worktree mode
+   - Otherwise, ask user (use AskUserQuestion tool):
+     - Question: "Create branch in a worktree for parallel development?"
+     - Options:
+       - "In-place (default)" - Check out branch in current repo
+       - "Worktree" - Create isolated worktree directory
+   - If CLAUDE.md contains `default-worktree: true`, default to worktree mode
+
+5. **Generate branch name**:
    - Generate slug from issue title:
      - Convert to lowercase
      - Replace spaces with hyphens
@@ -82,10 +98,36 @@ The complete workflow has five phases:
      - Truncate to 50 characters
    - Branch name format: `{issue-number}-{slug}`
      - Example: `42-add-user-authentication`
-   - Run: `git checkout -b "{branch_name}"`
 
-5. **Confirm success**:
-   - Display: "✓ Created branch: {branch_name}"
+6a. **Create feature branch (In-place mode)**:
+   - Run: `git checkout -b "{branch_name}"`
+   - Continue to step 7
+
+6b. **Create feature branch in worktree (Worktree mode)**:
+   - Get repo name: `basename $(git rev-parse --show-toplevel)`
+   - Get repo parent dir: `dirname $(git rev-parse --show-toplevel)`
+   - Worktree path: `{parent_dir}/{repo_name}-{branch_name}`
+     - Example: `../myproject-42-add-user-authentication`
+   - Run: `git worktree add "{worktree_path}" -b "{branch_name}"`
+   - **Copy config files** (if they exist in source repo):
+     - `.env` → worktree (contains environment variables)
+     - `.env.local` → worktree
+     - `.env.development.local` → worktree
+     - Skip files listed in `worktree-skip-copy` in CLAUDE.md
+   - **Run setup hooks** (if configured in CLAUDE.md via `worktree-setup-command`):
+     - Example: `worktree-setup-command: npm install`
+     - Run the command in the new worktree directory
+   - Display: "✓ Created worktree at: {worktree_path}"
+
+7. **Confirm success**:
+   - For in-place mode:
+     - Display: "✓ Created branch: {branch_name}"
+   - For worktree mode:
+     - Display: "✓ Created worktree: {worktree_path}"
+     - Display: "✓ Branch: {branch_name}"
+     - Display: "To work in this worktree, open a new terminal and run:"
+     - Display: "  cd {worktree_path}"
+     - Display: "  claude" (to start a new Claude Code session there)
    - Display next steps:
      ```
      Next steps:
@@ -299,6 +341,80 @@ The complete workflow has five phases:
 
 **For detailed workflow**: See `/fix-pr-feedback` command documentation
 
+## Worktree Management Commands
+
+### List Worktrees
+
+**When**: User says `/git-workflow worktree list`
+
+**Steps**:
+1. Run: `git worktree list`
+2. Display the output showing all worktrees with their paths and branches
+
+### Remove Worktree
+
+**When**: User says `/git-workflow worktree remove {path}` or `/git-workflow worktree remove` (auto-detect)
+
+**Steps**:
+
+1. **Identify worktree to remove**:
+   - If path provided, use it
+   - If no path, show list of worktrees and ask user which to remove
+   - Never remove the main worktree (the original repo)
+
+2. **Validate the worktree**:
+   - Check worktree exists: `git worktree list | grep "{path}"`
+   - Check for uncommitted changes in the worktree
+   - If dirty, warn: "Worktree has uncommitted changes. Remove anyway?"
+
+3. **Check branch merge status**:
+   - Get branch name from worktree
+   - Check if branch was merged: `git branch --merged main | grep "{branch}"`
+   - If not merged, warn: "Branch {branch} has not been merged. Remove anyway?"
+
+4. **Remove the worktree**:
+   - Run: `git worktree remove "{path}"`
+   - If removal fails due to untracked files, offer: `git worktree remove --force "{path}"`
+
+5. **Optionally delete the branch**:
+   - Ask: "Delete branch {branch} as well?"
+   - If yes and branch is merged: `git branch -d "{branch}"`
+   - If yes and branch is not merged: `git branch -D "{branch}"` (with confirmation)
+
+6. **Confirm success**:
+   - Display: "✓ Removed worktree: {path}"
+   - If branch deleted: "✓ Deleted branch: {branch}"
+
+### Worktree Configuration Options
+
+Add these to your project's CLAUDE.md to customize worktree behavior:
+
+```markdown
+# Worktree Settings
+
+# Default to worktree mode (skip the prompt)
+default-worktree: true
+
+# Command to run in new worktrees for setup
+worktree-setup-command: npm install
+
+# Files to skip when copying to worktree (in addition to defaults)
+worktree-skip-copy:
+  - .env.production
+  - secrets.json
+```
+
+**Default files copied to worktrees** (if they exist):
+- `.env`
+- `.env.local`
+- `.env.development.local`
+- `.env.development`
+
+**Files never copied** (security):
+- `.env.production`
+- `.env.production.local`
+- Any file matching `*secret*` or `*credential*`
+
 ## Branch Naming Convention
 
 **Format**: `{issue-number}-{slug}`
@@ -385,6 +501,15 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - Include the transcript URL in the first commit message for full development context
 - Follow-up commits (fixes, feedback responses) don't need transcripts - they're part of the same PR
 - This follows Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
+
+### Worktree Tips
+
+- When creating worktrees, the user will need to open a **new terminal** and `cd` to the worktree path - Claude Code can't change the shell's directory
+- Worktrees share git history but have isolated file state - perfect for parallel Claude Code sessions
+- Remind users they can run `claude` in the new worktree to start a fresh session
+- When removing worktrees, always check for uncommitted changes first
+- The main worktree (original repo) cannot be removed - only additional worktrees
+- Worktree branches work exactly like regular branches for commits, pushes, and PRs
 
 ### Self-Review Phase Tips
 
