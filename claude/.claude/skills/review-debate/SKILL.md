@@ -214,7 +214,8 @@ For each issue, ask these questions IN ORDER:
 | Bucket | Criteria | Examples |
 |--------|----------|----------|
 | **FIX NOW** | Real bug, <5 min, or embarrassing | Null check, typo, obvious edge case |
-| **DEFER** | Valid, out of scope, or slow to fix | Refactor, missing feature, tech debt |
+| **DEFER → Issue** | Valid, out of scope, AND has clear milestone/label | "Add to milestone X", "label: area/auth" |
+| **DEFER → Skip** | Valid but vague; no obvious home | "Maybe refactor someday", "could add tests" |
 | **IGNORE** | Subjective, hypothetical, already considered | "I'd name it differently", "what if 100x scale" |
 
 ---
@@ -226,14 +227,45 @@ For each issue, ask these questions IN ORDER:
 - Note what you fixed
 
 ### DEFER items
-- Create GitHub issue:
-  ```bash
-  gh issue create --title "[concise title]" --body "Discovered during self-review of #[issue_num].
 
-  [description]
+**Before creating any issue, apply the "milestone or label" test:**
 
-  Context: Deferred to keep scope focused."
-  ```
+1. **Can you assign a specific milestone?** If yes, the issue has clear relevance to planned work.
+2. **Can you assign a meaningful label?** (e.g., `area/goals`, `bug`, `enhancement`) If yes, it's at least categorizable.
+3. **If neither applies:** Be skeptical. This repo moves fast—issues without clear homes become noise.
+
+**Decision tree for DEFER items:**
+
+```
+DEFER item identified
+    │
+    ├─► Has obvious milestone? ─► CREATE with milestone
+    │
+    ├─► Has obvious label(s)? ─► CREATE with label(s)
+    │
+    └─► Neither? ─► ASK USER or SKIP
+            │
+            └─► "Found [issue]. Can't identify milestone/label.
+                 Create issue anyway, or skip?"
+```
+
+**When you DO create an issue:**
+```bash
+gh issue create \
+  --title "[concise title]" \
+  --body "Discovered during self-review of #[issue_num].
+
+[description]
+
+Context: Deferred to keep scope focused." \
+  --milestone "[milestone name]" \  # if applicable
+  --label "deferred-review" \       # always add this
+  --label "[area label]"            # if applicable
+```
+
+**When you SKIP creating an issue:**
+- Note it in the "Ignored" section with reason: "No clear milestone/label; likely to go stale"
+- This is the RIGHT choice for vague improvements in a fast-moving repo
 
 ### IGNORE items
 - Document WHY in one line each (audit trail)
@@ -271,6 +303,7 @@ Output this format:
 2. [Significant] No test for empty string case
 3. [Minor] Variable `x` should be named `userInput`
 4. [Observation] Could use a validation library instead
+5. [Observation] Could add more comprehensive logging
 
 **Advocate said:**
 - "The validation handles the injection case via parameterized queries elsewhere"
@@ -283,11 +316,13 @@ Output this format:
 | SQL injection | YES - checked, parameterized queries used | IGNORE | Advocate's evidence checks out |
 | No empty string test | PARTIAL - HTML helps but JS should validate too | FIX NOW | 2 min to add, embarrassing if found |
 | Rename `x` | No rebuttal | IGNORE | Subjective style preference |
-| Use library | No rebuttal | DEFER | Valid but out of scope, create issue |
+| Use library | No rebuttal | DEFER → Issue | Valid; fits milestone "Forms v2", label `area/forms` |
+| Add logging | No rebuttal | DEFER → Skip | Vague; no clear milestone or label; would go stale |
 
 **Actions:**
 - Added empty string validation (FIX NOW)
-- Created issue #47: "Evaluate validation library for forms" (DEFER)
+- Created issue #47: "Evaluate validation library for forms" with milestone "Forms v2" (DEFER → Issue)
+- Skipped issue for logging: no clear home, noted in Ignored section
 - Ignored: SQL injection (rebutted), variable naming (subjective)
 
 **Output:**
@@ -298,11 +333,12 @@ Output this format:
 - Added empty string validation to form handler
 
 ### Deferred (1 item)
-- Evaluate validation library → #47
+- Evaluate validation library → #47 (milestone: Forms v2)
 
-### Ignored (2 items)
+### Ignored (3 items)
 - SQL injection: Parameterized queries already handle this
 - Variable naming: Subjective preference, code is clear enough
+- Comprehensive logging: No clear milestone/label; skipped to avoid stale issue
 
 ### Verdict
 Ready to proceed
@@ -318,3 +354,4 @@ Ready to proceed
 4. **Be decisive** - Your job is to DECIDE, not collect opinions
 5. **Bias toward original goal** - Requirements are the tiebreaker
 6. **Document IGNORE** - Future you wants to know why
+7. **Fewer issues > more issues** - In fast-moving repos, issues without clear homes become noise. Skip creating issues you can't milestone or label. An observation noted in "Ignored" is better than a stale issue.
