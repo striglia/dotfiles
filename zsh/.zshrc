@@ -1,9 +1,8 @@
 alias rm='rm -i'
 alias ccu='npx ccusage daily --breakdown'
 
-alias claude="/Users/striglia/.claude/local/claude"
-alias cld="/Users/striglia/.claude/local/claude"
-alias ccy="/Users/striglia/.claude/local/claude --permission-mode bypassPermissions"
-alias ccc="/Users/striglia/.claude/local/claude --permission-mode bypassPermissions --resume"
+alias cld="$HOME/.local/bin/claude"
+alias ccy="$HOME/.local/bin/claude --permission-mode bypassPermissions"
+alias ccc="$HOME/.local/bin/claude --permission-mode bypassPermissions --resume"
 
 alias python="python3"
