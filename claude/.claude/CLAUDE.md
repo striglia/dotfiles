@@ -4,6 +4,7 @@
 
 - **auto-git-workflow**: Always use the `/git-workflow` skill (not manual git commands) for feature branch work. Follow the skill step-by-step—every phase is mandatory. Complete phases without pausing for explicit user prompts.
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
+- **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
 
 ## Development Conventions
 
