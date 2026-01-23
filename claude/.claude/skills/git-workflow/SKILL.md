@@ -59,14 +59,24 @@ The complete workflow has five phases:
 
 **Steps**:
 
-1. **Validate prerequisites**:
-   - Check current branch is `main`: `git branch --show-current`
-   - If not on main, error: "Must be on main branch. Currently on: {branch}"
+1. **Detect worktree context**:
+   - Check if in a worktree: `git rev-parse --git-dir` vs `git rev-parse --git-common-dir`
+   - If `.git` dir differs from common dir, we're in a worktree
+   - Store result for later steps
+
+2. **Validate prerequisites**:
+   - Get current branch: `git branch --show-current`
+   - **If NOT in a worktree**:
+     - If not on `main`, error: "Must be on main branch. Currently on: {branch}"
+   - **If in a worktree**:
+     - Accept current branch as base (worktrees can't checkout main - it's used elsewhere)
+     - Note the base branch name for display
    - Check for uncommitted changes: `git diff-index --quiet HEAD --`
    - If dirty, error: "You have uncommitted changes. Commit or stash them first."
 
-2. **Update main branch**:
-   - Run: `git pull origin main`
+3. **Update base branch**:
+   - **If NOT in a worktree**: `git pull origin main`
+   - **If in a worktree**: `git pull origin {current_branch}` (or skip if branch has no upstream)
 
 3. **Fetch issue details**:
    - Run: `gh issue view {issue_num} --json title,state -q '{title: .title, state: .state}'`
@@ -381,6 +391,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - Issue number is the single source of truth (stored in branch name)
 - Multiple commits to same branch are fine - all will be included in PR
 - If user is already on a feature branch, detect issue number automatically
+- **Worktree detection**: Check `git rev-parse --git-dir` vs `git rev-parse --git-common-dir` - if they differ, you're in a worktree. Worktrees can't checkout `main` (it's already checked out in the main repo), so create feature branches from the worktree's current branch instead.
 - Generate transcript with `/export-session --gist` on the **initial commit only** (unless `skip-session-transcripts: true` in CLAUDE.md)
 - Include the transcript URL in the first commit message for full development context
 - Follow-up commits (fixes, feedback responses) don't need transcripts - they're part of the same PR
