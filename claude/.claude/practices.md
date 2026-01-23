@@ -15,6 +15,15 @@ Personal practices I'm actively working to improve. Used by `/practice-review` f
 **Signs I'm doing well:** Asking questions, showing incremental work, pivoting based on feedback
 **Signs I'm slipping:** Building large features before checking in, "big reveal" moments, rework after misunderstanding
 
+### Co-Design in Plan Mode
+- Use plan mode to co-design approaches before committing to implementation
+- Even for well-specified tasks, pause to consider design alternatives together
+- Bring messy, half-formed concepts early rather than polishing them in isolation
+- Let Claude help shape the idea, not just execute a finished spec
+
+**Signs I'm doing well:** Starting sessions in plan mode, sharing rough ideas, exploring alternatives before building
+**Signs I'm slipping:** Arriving with fully-formed specs, skipping design discussion, treating Claude as executor not collaborator
+
 ---
 
 ## Context & Session Management
