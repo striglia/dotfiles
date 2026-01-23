@@ -24,6 +24,16 @@ Personal practices I'm actively working to improve. Used by `/practice-review` f
 **Signs I'm doing well:** Starting sessions in plan mode, sharing rough ideas, exploring alternatives before building
 **Signs I'm slipping:** Arriving with fully-formed specs, skipping design discussion, treating Claude as executor not collaborator
 
+### Steer, Don't Row
+- Spend time on requirements and direction, not implementation details
+- Focus on injecting taste and wisdom - that's the highest-leverage use of my time
+- Let Claude handle the mechanical work while I focus on "what" and "why"
+- Stay out of unimportant implementation details
+- My value-add is judgment, priorities, and quality standards
+
+**Signs I'm doing well:** Giving feedback on direction and quality, delegating implementation, focusing on requirements clarity
+**Signs I'm slipping:** Dictating implementation details, micro-managing code style, doing work Claude could do
+
 ---
 
 ## Automation & Feedback Loops
