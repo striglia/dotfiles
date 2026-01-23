@@ -26,6 +26,21 @@ Personal practices I'm actively working to improve. Used by `/practice-review` f
 
 ---
 
+## Automation & Feedback Loops
+
+### Build Autonomous Loops
+- Invest in automation that lets Claude operate without manual check-ins
+- Don't do manual testing when you can write automated tests
+- Don't inspect logs by hand when logs can be made available to Claude
+- Don't verify by hand when you can write assertions or tests
+- Use TDD loops, compilation, type checking, formatting as automated feedback
+- Goal: reduce ambiguity in the design space and close loops faster
+
+**Signs I'm doing well:** Writing tests before asking Claude to implement, setting up tooling that Claude can run, investing in automation upfront
+**Signs I'm slipping:** Being the human-in-the-loop for things that could be programmatic, manually verifying output, copy-pasting logs into chat
+
+---
+
 ## Context & Session Management
 
 ### Minimize Compaction
