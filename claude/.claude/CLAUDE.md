@@ -6,6 +6,13 @@
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
 
+## Bug Fix Workflow
+
+When user reports a bug ("X is not working", "X is broken", "bug in X"):
+1. Invoke `/tdd-bugfix` skill immediately
+2. Follow Red → Green → Refactor cycle
+3. Don't jump into debugging without writing a failing test first
+
 ## Development Conventions
 
 - **Playwright screenshots**: Always use `downloadsDir: "/tmp"` when taking screenshots to avoid polluting ~/Downloads
