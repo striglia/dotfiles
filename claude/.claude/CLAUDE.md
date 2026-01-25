@@ -8,10 +8,20 @@
 
 ## Bug Fix Workflow
 
-When user reports a bug ("X is not working", "X is broken", "bug in X"):
-1. Invoke `/tdd-bugfix` skill immediately
-2. Follow Red → Green → Refactor cycle
-3. Don't jump into debugging without writing a failing test first
+When implementing ANY bugfix—whether from:
+- A bug report ("X is not working", "X is broken")
+- A plan that fixes a bug
+- A PR review comment about a bug
+- A failing test investigation
+
+**ALWAYS:**
+1. Invoke `/tdd-bugfix` skill FIRST, before writing any fix code
+2. Write a failing test that reproduces the bug
+3. THEN implement the fix
+4. Never rationalize skipping tests because code is "hard to test"
+   - If testing requires infrastructure, BUILD the infrastructure
+   - That infrastructure has value for future development
+   - "Manual testing" is not acceptable for agentic workflows
 
 ## Development Conventions
 

@@ -326,6 +326,21 @@ git commit -m "Add drag-and-drop tests and fix implementation
 - **Performance tuning**: Unless testing performance thresholds
 - **Visual design tweaks**: CSS changes (use design iteration skill instead)
 
+## Anti-Rationalization Rules
+
+Do NOT skip writing tests because:
+
+❌ **"UI code is hard to test"** → Build the test infrastructure. It's valuable.
+❌ **"The fix is simple/obvious"** → Simple fixes regress too. Test them.
+❌ **"Code review is sufficient"** → Code review doesn't catch regressions.
+❌ **"Manual testing is enough"** → Manual testing doesn't enable agentic development.
+❌ **"The logic is self-evident"** → Self-evident logic can still be wrong.
+❌ **"We don't have test infrastructure"** → Create it. That's part of the fix.
+
+The ONLY valid reasons to skip tests are listed in "When NOT to Use TDD" above.
+
+**If you find yourself rationalizing, STOP.** Write the test.
+
 ## Integration with Other Skills
 
 - **After fixing**: Use design-iterate skill if UI bug
