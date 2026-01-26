@@ -27,12 +27,14 @@ For these, a quick manual review is sufficient.
 
 ## Core Concept
 
-Two subagents debate from opposing perspectives:
+Three subagents debate from opposing perspectives:
 - **Advocate**: Argues FOR the current approach
-- **Critic**: Finds every possible problem
+- **Critic**: Finds every possible correctness problem
+- **Principal Engineer**: Evaluates complexity and architectural fitness
 
 You (parent agent) synthesize into:
 - **FIX NOW**: Quick wins, embarrassing issues
+- **SIMPLIFY**: Complexity that should be reduced
 - **DEFER**: Valid but out of scope → create tickets
 - **IGNORE**: Subjective, hypothetical
 
@@ -68,7 +70,7 @@ If skipping: "Skipping review-debate: trivial change"
 
 ## Step 3: Launch Parallel Subagents
 
-Call the Task tool TWICE in a single message to run them in parallel.
+Call the Task tool THREE TIMES in a single message to run them in parallel.
 
 ### Subagent A: The Advocate
 
@@ -169,11 +171,85 @@ For each issue:
 Be harsh. Don't hold back.
 ```
 
+### Subagent C: The Principal Engineer
+
+Use Task tool with:
+- description: "Evaluate complexity and architecture"
+- subagent_type: "general-purpose"
+- model: "sonnet"
+- prompt: (see template below)
+
+**Principal Engineer Prompt Template:**
+
+```
+# Role: Principal Engineer
+
+You are reviewing code changes. EVALUATE COMPLEXITY AND ARCHITECTURE.
+
+Your job is NOT to find bugs (the Critic does that). Your job is to ask: "Is this the right approach? Is it appropriately simple?"
+
+## What's Being Reviewed
+[one-line description]
+
+## Requirements
+[issue title and body]
+
+## The Changes
+[paste the diff]
+
+## Your Task
+
+Evaluate the change through a complexity lens:
+
+### Net Complexity Delta
+- Does this add complexity to the codebase? Is it justified by the value delivered?
+- Could we achieve the same goal with less code or fewer abstractions?
+- Are we adding layers/indirection that don't serve a clear purpose?
+
+### Reuse Assessment
+- Is there existing code in this codebase that could be leveraged?
+- If we're not reusing something similar, is that the right call? (Sometimes duplication IS better than the wrong abstraction)
+- Are we creating something that SHOULD be reused later? If so, is it appropriately general (not over-general)?
+
+### Abstraction Quality
+- Is any new abstraction premature? (Rule of three: don't extract until 3rd use)
+- Does the abstraction "pay for itself" in reduced cognitive load?
+- Are we hiding the right things? Exposing the right things?
+
+### Simplest Path
+- What's the simplest possible solution that meets the requirements?
+- Is this change doing more than it needs to?
+- Could we solve this with configuration instead of code? With deletion instead of addition?
+
+## Output Format
+
+For each concern, use one of these categories:
+
+**SIMPLIFY** (complexity should be reduced):
+- **What**: [specific code or pattern]
+- **Why**: [why it's over-engineered]
+- **Alternative**: [simpler approach]
+
+**REUSE** (missed opportunity):
+- **What**: [code that could be leveraged]
+- **Where**: [location of existing code]
+- **Tradeoff**: [any downsides to reusing]
+
+**QUESTION** (needs justification):
+- **What**: [architectural decision that seems unjustified]
+- **Concern**: [why it might be wrong]
+
+**APPROVE** (appropriately scoped):
+- [aspects that are well-designed and not over-engineered]
+
+Be balanced. Complexity isn't always bad—sometimes it's the right trade. But make the case either way.
+```
+
 ---
 
 ## Step 4: Synthesize the Debate
 
-After both return, YOU must deliberate. Follow this exact process:
+After all three return, YOU must deliberate. Follow this exact process:
 
 ### 4a. List all Critic issues
 
@@ -209,11 +285,24 @@ For each issue, ask these questions IN ORDER:
 4. **Would it embarrass you?** If a human reviewer found this, would you be embarrassed?
    - If yes → FIX NOW regardless of time
 
+5. **Is it over-engineered?** (from Principal Engineer)
+   - Did PE flag SIMPLIFY for this code?
+   - Is the simpler alternative viable with comparable effort?
+   - If yes → consider SIMPLIFY (refactor now if quick, else DEFER)
+   - If simpler approach requires major rework → DEFER with "simplification" label
+
+6. **Are we missing reuse?** (from Principal Engineer)
+   - Did PE flag REUSE for existing code?
+   - Is the reuse a clean fit, or would it require awkward adaptation?
+   - If clean fit → SIMPLIFY (refactor to use existing code)
+   - If awkward → IGNORE (document why duplication was chosen)
+
 ### Classification Table
 
 | Bucket | Criteria | Examples |
 |--------|----------|----------|
 | **FIX NOW** | Real bug, <5 min, or embarrassing | Null check, typo, obvious edge case |
+| **SIMPLIFY** | Over-engineered, <15 min to refactor | Remove unnecessary abstraction, use existing util |
 | **DEFER → Issue** | Valid, out of scope, AND has clear milestone/label | "Add to milestone X", "label: area/auth" |
 | **DEFER → Skip** | Valid but vague; no obvious home | "Maybe refactor someday", "could add tests" |
 | **IGNORE** | Subjective, hypothetical, already considered | "I'd name it differently", "what if 100x scale" |
@@ -282,6 +371,9 @@ Output this format:
 ### Fixed (N items)
 - [what you fixed]
 
+### Simplified (N items)
+- [complexity you reduced]
+
 ### Deferred (N items)
 - [title] → [link to created issue]
 
@@ -309,18 +401,27 @@ Output this format:
 - "The validation handles the injection case via parameterized queries elsewhere"
 - "Empty string is handled by the required attribute on the HTML input"
 
+**Principal Engineer found:**
+1. [SIMPLIFY] New `ValidationHelper` class wraps a single function—premature abstraction
+2. [REUSE] `utils/sanitize.js` already has `trimAndValidate()` that does 80% of this
+3. [APPROVE] Error message handling is appropriately simple
+
 **Synthesis:**
 
-| Issue | Rebuttal Valid? | Classification | Reasoning |
-|-------|----------------|----------------|-----------|
-| SQL injection | YES - checked, parameterized queries used | IGNORE | Advocate's evidence checks out |
-| No empty string test | PARTIAL - HTML helps but JS should validate too | FIX NOW | 2 min to add, embarrassing if found |
-| Rename `x` | No rebuttal | IGNORE | Subjective style preference |
-| Use library | No rebuttal | DEFER → Issue | Valid; fits milestone "Forms v2", label `area/forms` |
-| Add logging | No rebuttal | DEFER → Skip | Vague; no clear milestone or label; would go stale |
+| Issue | Source | Rebuttal Valid? | Classification | Reasoning |
+|-------|--------|----------------|----------------|-----------|
+| SQL injection | Critic | YES - checked, parameterized queries used | IGNORE | Advocate's evidence checks out |
+| No empty string test | Critic | PARTIAL - HTML helps but JS should validate too | FIX NOW | 2 min to add, embarrassing if found |
+| Rename `x` | Critic | No rebuttal | IGNORE | Subjective style preference |
+| Use library | Critic | No rebuttal | DEFER → Issue | Valid; fits milestone "Forms v2", label `area/forms` |
+| Add logging | Critic | No rebuttal | DEFER → Skip | Vague; no clear milestone or label; would go stale |
+| ValidationHelper class | PE | N/A | SIMPLIFY | Single method, no need for class—inline it |
+| Reuse sanitize.js | PE | N/A | SIMPLIFY | Clean fit, extend existing util instead |
 
 **Actions:**
 - Added empty string validation (FIX NOW)
+- Inlined ValidationHelper to a simple function (SIMPLIFY)
+- Refactored to use `trimAndValidate()` from utils/sanitize.js (SIMPLIFY)
 - Created issue #47: "Evaluate validation library for forms" with milestone "Forms v2" (DEFER → Issue)
 - Skipped issue for logging: no clear home, noted in Ignored section
 - Ignored: SQL injection (rebutted), variable naming (subjective)
@@ -331,6 +432,10 @@ Output this format:
 
 ### Fixed (1 item)
 - Added empty string validation to form handler
+
+### Simplified (2 items)
+- Inlined ValidationHelper class to simple function (was premature abstraction)
+- Refactored to use existing trimAndValidate() from utils/sanitize.js
 
 ### Deferred (1 item)
 - Evaluate validation library → #47 (milestone: Forms v2)
@@ -350,7 +455,7 @@ Ready to proceed
 
 1. **Embed context explicitly** - Subagents only see what's in their prompt
 2. **Use Sonnet** - Code review needs nuance; Haiku is too shallow
-3. **Run in parallel** - Both subagents are independent
+3. **Run in parallel** - All three subagents are independent
 4. **Be decisive** - Your job is to DECIDE, not collect opinions
 5. **Bias toward original goal** - Requirements are the tiebreaker
 6. **Document IGNORE** - Future you wants to know why
