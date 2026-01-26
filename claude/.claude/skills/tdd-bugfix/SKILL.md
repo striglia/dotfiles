@@ -11,6 +11,7 @@ Apply Test-Driven Development to bug fixes by writing failing tests first, then 
 ## When to Use
 
 Invoke when the user reports a bug and wants to:
+
 - Fix a bug using TDD methodology
 - Add test coverage for an existing bug
 - Ensure bugs don't regress in the future
@@ -19,6 +20,7 @@ Invoke when the user reports a bug and wants to:
 ## Core Philosophy
 
 **Red → Green → Refactor**
+
 1. **Red**: Write a failing test that reproduces the bug
 2. **Green**: Write minimal code to make the test pass
 3. **Refactor**: Clean up if needed (optional)
@@ -40,6 +42,7 @@ Invoke when the user reports a bug and wants to:
    - Which component/module is affected?
 
 2. **Identify test level** (Testing Pyramid):
+
    ```
    E2E Tests          ← Fewest, most expensive
    Integration Tests  ← Moderate
@@ -60,7 +63,10 @@ Invoke when the user reports a bug and wants to:
 
 ### Phase 2: Write Failing Test
 
+**CRITICAL: The test MUST fail before you write any fix code.**
+
 1. **Create test that reproduces the bug**:
+
    ```javascript
    describe('BugFix: [Brief description]', () => {
        test('should [expected behavior]', () => {
@@ -70,20 +76,32 @@ Invoke when the user reports a bug and wants to:
            // Act: Trigger the buggy code
            const result = buggyFunction(input);
 
-           // Assert: Verify expected behavior
+           // Assert: Verify expected behavior (what SHOULD happen)
            expect(result).toBe(expectedValue);
        });
    });
    ```
 
+   **Important**: The test must assert what the _correct_ behavior should be, NOT document what the broken behavior is. If you write `expect(brokenFunction()).toBe(brokenValue)`, that test will pass and you've failed TDD.
+
 2. **Run test to confirm it fails**:
+
    ```bash
    npm test -- path/to/test.js
    ```
 
+   **YOU MUST SEE THE TEST FAIL.** If it passes, either:
+   - Your test is wrong (it's testing current buggy behavior, not correct behavior)
+   - The bug doesn't exist or was already fixed
+   - You misunderstand the bug
+
 3. **Verify failure reason matches bug**:
    - Ensure test fails for the right reason
    - Failure message should clearly indicate the bug
+   - The expected value should be the _correct_ behavior
+   - The received value should match the _buggy_ behavior
+
+**DO NOT PROCEED TO PHASE 3 UNTIL YOU HAVE A FAILING TEST.**
 
 ### Phase 3: Fix the Code
 
@@ -93,6 +111,7 @@ Invoke when the user reports a bug and wants to:
    - Don't add extra features
 
 2. **Run test again**:
+
    ```bash
    npm test -- path/to/test.js
    ```
@@ -105,6 +124,7 @@ Invoke when the user reports a bug and wants to:
 ### Phase 4: Verify No Regressions
 
 1. **Run full test suite**:
+
    ```bash
    npm test
    ```
@@ -121,6 +141,7 @@ Invoke when the user reports a bug and wants to:
 ### Phase 5: Commit
 
 1. **Commit with clear message**:
+
    ```bash
    git add [test-file] [source-file]
    git commit -m "[Component]: Fix [bug description]
@@ -133,43 +154,52 @@ Invoke when the user reports a bug and wants to:
 ## Testing Pyramid Guidelines
 
 ### Unit Tests (Prefer These!)
+
 **When to use**:
+
 - Bug in pure function
 - Bug in class method
 - Bug in data transformation
 - Bug in validation logic
 
 **Example**:
+
 ```javascript
 // Bug: formatDate() returns wrong format
-test('should format date as YYYY-MM-DD', () => {
-    expect(formatDate('2025-01-15')).toBe('2025-01-15');
+test("should format date as YYYY-MM-DD", () => {
+  expect(formatDate("2025-01-15")).toBe("2025-01-15");
 });
 ```
 
 ### Integration Tests (Use Moderately)
+
 **When to use**:
+
 - Bug in module interaction
 - Bug in data flow between components
 - Bug in API integration
 
 **Example**:
+
 ```javascript
 // Bug: DataLoader doesn't handle API errors
-test('should return empty array when API fails', async () => {
-    mockFetch.mockRejectedValue(new Error('404'));
-    const result = await loader.loadData();
-    expect(result).toEqual([]);
+test("should return empty array when API fails", async () => {
+  mockFetch.mockRejectedValue(new Error("404"));
+  const result = await loader.loadData();
+  expect(result).toEqual([]);
 });
 ```
 
 ### E2E Tests (Use Sparingly!)
+
 **When to use**:
+
 - Bug in critical user workflow
 - Bug that only manifests in full app context
 - Bug in browser-specific behavior
 
 **Example**:
+
 ```javascript
 // Bug: Drag-and-drop doesn't work in Kanban board
 test('should move task between columns', () => {
@@ -183,45 +213,50 @@ test('should move task between columns', () => {
 ## Common Patterns
 
 ### Pattern 1: Null/Undefined Handling
+
 ```javascript
 // Bug: Function crashes on null input
-test('should handle null input gracefully', () => {
-    expect(() => processData(null)).not.toThrow();
-    expect(processData(null)).toBe(null); // or default value
+test("should handle null input gracefully", () => {
+  expect(() => processData(null)).not.toThrow();
+  expect(processData(null)).toBe(null); // or default value
 });
 ```
 
 ### Pattern 2: Edge Cases
+
 ```javascript
 // Bug: Loop fails on empty array
-test('should handle empty array', () => {
-    expect(sumArray([])).toBe(0);
+test("should handle empty array", () => {
+  expect(sumArray([])).toBe(0);
 });
 ```
 
 ### Pattern 3: Async Errors
+
 ```javascript
 // Bug: Promise rejection not caught
-test('should handle async errors', async () => {
-    await expect(fetchData('invalid')).rejects.toThrow();
+test("should handle async errors", async () => {
+  await expect(fetchData("invalid")).rejects.toThrow();
 });
 ```
 
 ### Pattern 4: State Management
+
 ```javascript
 // Bug: State not updated correctly
-test('should update state when action dispatched', () => {
-    store.dispatch(action);
-    expect(store.getState()).toEqual(expectedState);
+test("should update state when action dispatched", () => {
+  store.dispatch(action);
+  expect(store.getState()).toEqual(expectedState);
 });
 ```
 
 ### Pattern 5: DOM Manipulation
+
 ```javascript
 // Bug: Element not removed from DOM
-test('should remove element when deleted', () => {
-    component.delete();
-    expect(document.querySelector('.item')).toBeNull();
+test("should remove element when deleted", () => {
+  component.delete();
+  expect(document.querySelector(".item")).toBeNull();
 });
 ```
 
@@ -230,6 +265,7 @@ test('should remove element when deleted', () => {
 **Bug Report**: "Drag-and-drop in Kanban board doesn't work - cards don't move between columns"
 
 ### Step 1: Write Failing Test
+
 ```javascript
 test('should update task status when dropped in different column', () => {
     const kanbanView = new KanbanBoardView(tasks);
@@ -253,6 +289,7 @@ test('should update task status when dropped in different column', () => {
 ```
 
 ### Step 2: Run Test (Fails ❌)
+
 ```bash
 $ npm test -- kanbanBoard.test.js
 Expected: 'in_progress'
@@ -260,6 +297,7 @@ Received: 'pending'
 ```
 
 ### Step 3: Fix Code
+
 ```javascript
 _handleDrop(event) {
     // ... existing code ...
@@ -275,18 +313,21 @@ _handleDrop(event) {
 ```
 
 ### Step 4: Run Test (Passes ✅)
+
 ```bash
 $ npm test -- kanbanBoard.test.js
 ✓ should update task status when dropped in different column
 ```
 
 ### Step 5: Run Full Suite
+
 ```bash
 $ npm test
 ✓ All 45 tests passing
 ```
 
 ### Step 6: Commit
+
 ```bash
 git add src/js/components/kanbanBoard.{js,test.js}
 git commit -m "Add drag-and-drop tests and fix implementation
