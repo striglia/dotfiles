@@ -257,7 +257,21 @@ The complete workflow has five phases:
    - Run: `gh pr create --title "{pr_title}" --body "{pr_body}" --base main`
    - Get PR URL: `gh pr view --json url -q .url`
 
-6. **Confirm success**:
+6. **Cross-session insights check**:
+   - Check if `insights.md` or `insights.markdown` exists in the project root
+   - If not found, skip to step 7
+   - If found, read the file to understand the format
+   - Reflect: "Did I learn something surprising on this branch — especially something guided by user feedback — that would matter to an agent on a different branch?"
+   - An insight qualifies if it is:
+     - **Non-obvious**: An agent wouldn't discover it from reading a single file
+     - **Durable**: Will still be true in a month
+     - **Generalizable**: Applies beyond the specific ticket
+   - If nothing qualifies, skip to step 7 — not every branch produces an insight
+   - If something qualifies, append a new entry to the insights file following its existing format
+   - Stage and commit: `git add insights.md && git commit -m "#{issue_num}: Add cross-session insight"`
+   - Push: `git push`
+
+7. **Confirm success**:
    - Display: "✓ Created PR: {pr_url}"
    - Display: "Next: Wait for code review, then use `/fix-pr-feedback` to address comments."
 
