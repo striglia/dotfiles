@@ -38,6 +38,40 @@ Session-by-session reflections on adherence to practices defined in `practices.m
 
 ---
 
+## 2026-01-27 | project: Loupe | overall: 6.8/10
+
+**Session:** Meta-fixes from friction log c4d9de33 (Issues #77-83)
+
+### Conversational over Waterfall
+- **Rating:** 9/10
+- **Evidence:** Iterative bug discovery through user testing; user insight led to correct position-based solution
+- **Note:** Excellent iterative refinement—user testing surfaced root cause
+
+### Co-Design in Plan Mode
+- **Rating:** 7/10
+- **Evidence:** Continued from established plan; architecture shift emerged from testing failures
+- **Note:** Position-based approach was reactive; could anticipate with deeper upfront analysis
+
+### Steer, Don't Row
+- **Rating:** 8/10
+- **Evidence:** User provided key insight about marker position, delegated implementation
+- **Note:** Good balance—steered toward correct approach, let Claude execute
+
+### Build Autonomous Loops
+- **Rating:** 7/10
+- **Evidence:** Tests for ghost marker fix; log file analysis for debugging; manual testing for accessibility APIs
+- **Note:** Consider recording expected behaviors for regression
+
+### Minimize Compaction
+- **Rating:** 3/10
+- **Evidence:** Session hit context limits and required compaction
+- **Note:** Large scope (6+ issues) in single session; split multi-issue milestones
+
+**Highlight:** User's key insight ("only the actual final position of the markers") exemplified excellent steering
+**Focus:** Split multi-issue milestones into focused sessions to avoid compaction
+
+---
+
 ## 2026-01-26 | project: dotfiles | overall: 7.6/10
 
 **Session:** Adding Principal Engineer voice to review-debate skill

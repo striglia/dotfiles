@@ -6,6 +6,22 @@
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
 
+## Subagent Context Management
+
+When spawning parallel subagents for research or analysis tasks:
+
+- **Cap output returned to main context**: Subagents should return concise summaries (key findings, not full transcripts). If the user needs detail, they'll ask.
+- **Write verbose findings to temp files**: For large analysis tasks (mining session logs, scanning git history), have subagents write full reports to `/tmp/` and return only the summary + file path.
+- **Avoid context overflow**: Dumping multiple large subagent reports into the main conversation causes compaction and context loss. Summarize first, detail on demand.
+
+## Process Artifact Discoverability
+
+When creating new files that agents should consult (like `insights.md`, `ARCHITECTURE.md`, or similar process artifacts):
+
+- **Update CLAUDE.md in the same commit** — don't ask, just do it. If a file's purpose is to be read by future agents, it must be referenced from the file every agent reads at session start.
+- **Include the file in relevant sections**: Add a brief description of what the file contains and when to consult it.
+- **This is not optional**: Creating an agent-facing file without updating CLAUDE.md is like adding a tool without documenting it.
+
 ## Bug Fix Workflow
 
 When implementing ANY bugfix—whether from:
