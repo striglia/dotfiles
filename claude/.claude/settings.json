@@ -1,0 +1,63 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/credentials/**)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*_rsa)",
+      "Read(**/*_ed25519)",
+      "Read(**/*_ecdsa)",
+      "Read(**/*_dsa)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.netrc)",
+      "Read(~/.npmrc)",
+      "Read(~/.docker/config.json)",
+      "Read(**/.htpasswd)",
+      "Read(**/secrets.json)",
+      "Read(**/secret.json)",
+      "Read(**/*secret*.json)",
+      "Read(**/*credentials*.json)",
+      "Read(**/*.keystore)",
+      "Read(**/*.jks)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/striglia/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/claude-overlord.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "OUTPUT FORMAT: Return ONLY a JSON object. No prose, no markdown, no explanation. Just the raw JSON.\n\nYou validate plan quality. Analyze the session:\n\n1. IF NOT A PLAN SESSION (no plan file created, no ExitPlanMode used): Output exactly: {\"ok\":true}\n\n2. IF A PLAN WAS CREATED, check for:\n   - SUCCESS CRITERIA: Measurable outcomes (not vague like 'tests pass' or 'works correctly')\n   - STOPPING CONDITIONS: Both completion AND early-termination triggers\n   - VERIFICATION: Concrete checks for each criterion\n\n   If all present: {\"ok\":true}\n   If any missing: {\"ok\":false,\"reason\":\"Missing [X]. Add [specific example].\"}\n\nEXAMPLES OF VALID OUTPUT:\n{\"ok\":true}\n{\"ok\":false,\"reason\":\"Missing stopping conditions. Add: Stop when ALL [...] + Stop EARLY if [...]\"}\n\nOUTPUT JSON ONLY:",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
