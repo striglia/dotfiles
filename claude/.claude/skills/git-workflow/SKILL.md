@@ -13,6 +13,7 @@ Complete workflow for implementing features tracked in GitHub Issues.
 **Recognize user intent, not literal phrases:**
 
 Invoke this skill immediately when the user indicates they want you to:
+
 - Start working on a GitHub issue (by number or URL)
 - Implement a feature tracked by an issue
 - Fix a bug tracked by an issue
@@ -21,6 +22,7 @@ Invoke this skill immediately when the user indicates they want you to:
 **Action: Invoke `/git-workflow {issue-number}` as your FIRST response**
 
 Do NOT:
+
 - Fetch the issue yourself
 - Create a todo list first
 - Start making changes
@@ -29,6 +31,7 @@ Do NOT:
 The skill handles the complete workflow from start to finish.
 
 **Explicit invocation**:
+
 - User says `/git-workflow 42` or `/git-workflow {issue-number}`
 - User says `/git-workflow commit` (when on a feature branch)
 - User says `/git-workflow review` (self-review with subagent debate)
@@ -78,13 +81,13 @@ The complete workflow has five phases:
    - **If NOT in a worktree**: `git pull origin main`
    - **If in a worktree**: `git pull origin {current_branch}` (or skip if branch has no upstream)
 
-3. **Fetch issue details**:
+4. **Fetch issue details**:
    - Run: `gh issue view {issue_num} --json title,state -q '{title: .title, state: .state}'`
    - Parse the JSON response to extract title and state
    - Display: "Issue #{issue_num}: {title}" and "State: {state}"
    - If state is "CLOSED", warn: "Warning: This issue is already closed."
 
-4. **Create feature branch**:
+5. **Create feature branch**:
    - Generate slug from issue title:
      - Convert to lowercase
      - Replace spaces with hyphens
@@ -94,7 +97,7 @@ The complete workflow has five phases:
      - Example: `42-add-user-authentication`
    - Run: `git checkout -b "{branch_name}"`
 
-5. **Confirm success**:
+6. **Confirm success**:
    - Display: "✓ Created branch: {branch_name}"
    - Display next steps:
      ```
@@ -151,6 +154,7 @@ The complete workflow has five phases:
 7. **Create commit**:
    - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
    - Format commit message (with transcript if this is the first commit):
+
      ```
      #{issue_num}: {issue_title}
 
@@ -160,7 +164,9 @@ The complete workflow has five phases:
 
      Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
      ```
+
    - For follow-up commits (no transcript):
+
      ```
      #{issue_num}: {description of changes}
 
@@ -168,6 +174,7 @@ The complete workflow has five phases:
 
      Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
      ```
+
    - Run: `git commit -m "{commit_msg}"`
 
 8. **Confirm success**:
@@ -175,11 +182,16 @@ The complete workflow has five phases:
    - Show latest commit: `git log -1 --oneline`
    - Display: "Next step: /git-workflow review"
 
-## Phase 3: Self-Review with Subagent Debate
+## Phase 3: Self-Review
 
 **When**: After commit, before push. This phase is MANDATORY - never skip to push without reviewing first.
 
 **Purpose**: Catch issues before they go to human reviewers.
+
+**Review Methods** (configurable via CLAUDE.md `review-method`):
+
+- `review-debate` (default): Adversarial subagent debate with Advocate, Critic, and Principal Engineer
+- `codex-review`: External review using OpenAI Codex in headless mode
 
 **Steps**:
 
@@ -188,9 +200,16 @@ The complete workflow has five phases:
    - If branch is "main", error: "Nothing to review on main branch."
    - Extract issue number from branch name
 
-2. **Invoke the review-debate skill**:
+2. **Check review method configuration**:
+   - Look for `review-method: codex-review` or `review-method: review-debate` in CLAUDE.md
+   - Default to `review-debate` if not specified
+
+3. **Invoke the appropriate review skill**:
+
+   **If review-method is `review-debate` (default):**
 
    Run `/review-debate` with context:
+
    ```
    /review-debate
 
@@ -204,9 +223,20 @@ The complete workflow has five phases:
    - Making quick fixes and creating deferred issues
    - Reporting results
 
-   See `/review-debate` skill documentation for full details on the adversarial debate pattern.
+   See `/review-debate` skill documentation for full details.
 
-3. **Confirm completion**:
+   **If review-method is `codex-review`:**
+
+   Run `/codex-review` which:
+   - Gathers the diff and issue context
+   - Calls Codex CLI in headless mode with a structured review prompt
+   - Processes the review output
+   - Fixes critical issues
+   - Reports results
+
+   See `/codex-review` skill documentation for full details.
+
+4. **Confirm completion**:
    - Display: "✓ Self-review complete"
    - Display: "Ready for: /git-workflow push"
 
@@ -245,6 +275,7 @@ The complete workflow has five phases:
    - Get commit list: `git log origin/main..HEAD --pretty=format:"- %s"`
    - Format PR title: `{issue_title}`
    - Format PR body:
+
      ```
      Closes #{issue_num}
 
@@ -254,6 +285,7 @@ The complete workflow has five phases:
      ## Changes
      {commits}
      ```
+
    - Run: `gh pr create --title "{pr_title}" --body "{pr_body}" --base main`
    - Get PR URL: `gh pr view --json url -q .url`
 
@@ -315,6 +347,7 @@ The complete workflow has five phases:
    - GitHub automatically deletes the feature branch (if configured)
 
 **Key principles**:
+
 - Be responsive to feedback - address comments promptly
 - Make wise decisions - not all feedback requires immediate action
 - Communicate clearly - explain your decisions in PR comments
@@ -328,11 +361,13 @@ The complete workflow has five phases:
 **Format**: `{issue-number}-{slug}`
 
 **Examples**:
+
 - Issue #8: "Fix wasteful test process" → `8-fix-wasteful-test-process`
 - Issue #42: "Add user authentication" → `42-add-user-authentication`
 - Issue #123: "Update API to use GraphQL instead of REST" → `123-update-api-to-use-graphql-instead-of-rest`
 
 **Why this format**:
+
 - Issue number at start enables easy extraction with regex `^[0-9]+`
 - No ambiguity - each branch maps to exactly one issue
 - Human-readable and git-friendly
@@ -342,6 +377,7 @@ The complete workflow has five phases:
 **Format**: `#{issue-number}: {title-or-description}`
 
 **Initial commit** (with transcript, unless opted out):
+
 ```
 #{issue-number}: {issue-title}
 
@@ -353,6 +389,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 **Follow-up commits** (no transcript):
+
 ```
 #{issue-number}: {description of changes}
 
@@ -362,11 +399,13 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
 **Examples**:
+
 - Initial: `#8: Fix wasteful test process and auto-run behavior` (with transcript)
 - Follow-up: `#8: Fix formatting for CI` (no transcript)
 - Follow-up: `#8: Address review feedback on error handling` (no transcript)
 
 **Why this format**:
+
 - GitHub automatically links to issue
 - Clear traceability
 - Consistent across all commits in the project
@@ -414,6 +453,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ### Self-Review Phase Tips
 
 See `/review-debate` skill for detailed guidance on:
+
 - Spawning parallel Advocate and Critic subagents
 - Synthesizing debate into actionable decisions
 - FIX NOW vs DEFER vs IGNORE classification criteria
@@ -427,6 +467,7 @@ skip-session-transcripts: true
 ```
 
 This is useful for:
+
 - Private/sensitive projects where transcripts shouldn't be public
 - Quick fixes where full transcript context isn't valuable
 - Projects with strict data handling requirements
