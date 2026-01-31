@@ -48,11 +48,12 @@ The skill handles the complete workflow from start to finish.
 
 ## Core Workflow
 
-The complete workflow has five phases:
+The complete workflow has six phases:
 
 1. **Start**: `/git-workflow {issue-number}` - Create feature branch
 2. **Commit**: `/git-workflow commit` - Stage and commit changes
 3. **Review**: `/git-workflow review` - Self-review with subagent debate (MANDATORY)
+3.5. **Reconstruct**: (automatic) - Clean up commit history before push
 4. **Push**: `/git-workflow push` - Push branch and create PR
 5. **Feedback**: `/fix-pr-feedback` - Address reviewer feedback and iterate
 
@@ -238,7 +239,137 @@ The complete workflow has five phases:
 
 4. **Confirm completion**:
    - Display: "✓ Self-review complete"
-   - Display: "Ready for: /git-workflow push"
+   - Display: "Ready for: /git-workflow push (will auto-reconstruct history if needed)"
+
+## Phase 3.5: Reconstruct History
+
+**When**: Automatically triggered as part of `/git-workflow push` before pushing. Can also be invoked directly with `/git-workflow reconstruct`.
+
+**Purpose**: Transform messy development history (try A, fix typo, try B, WIP) into clean, semantic commits optimized for code reviewers.
+
+**Skip Conditions** (check these first):
+- Only 1-2 commits on branch (nothing to clean up)
+- All commits already look semantic (no "fix typo", "WIP", iteration patterns)
+- User has `skip-history-reconstruction: true` in CLAUDE.md
+- User explicitly skips at preview prompt
+
+**Steps**:
+
+1. **Check skip conditions**:
+   - Count commits: `git rev-list --count origin/main..HEAD`
+   - If ≤ 2 commits, display: "Only {n} commits - skipping reconstruction" and proceed to Phase 4
+   - Read commit messages: `git log origin/main..HEAD --pretty=format:"%s"`
+   - Check for messy patterns (case-insensitive): "fix", "typo", "wip", "temp", "try", "test", "debug", "cleanup", "oops"
+   - If no messy patterns found, display: "Commits already look clean - skipping reconstruction" and proceed to Phase 4
+   - Check if CLAUDE.md contains `skip-history-reconstruction: true` - if so, skip
+
+2. **Create safety backup**:
+   ```bash
+   BACKUP_BRANCH="${BRANCH}-backup-$(date +%s)"
+   git branch "$BACKUP_BRANCH"
+   ```
+   - Display: "✓ Backup created: {BACKUP_BRANCH}"
+
+3. **Analyze the diff**:
+   - Get all changed files: `git diff --name-status origin/main...HEAD`
+   - Parse file paths to extract domains and types
+   - Build a map of files to their logical groups
+
+4. **Group files into logical chunks** (priority order):
+
+   Use these heuristics to assign files to chunks:
+
+   | Priority | Category | Pattern Examples | Commit Prefix |
+   |----------|----------|------------------|---------------|
+   | 1 | Schema/migrations | `**/migrations/**`, `*.sql`, `schema.*` | `chore(db):` |
+   | 2 | Dependencies | `package.json`, `Cargo.toml`, `*.lock`, `go.mod` | `chore(deps):` |
+   | 3 | Binary assets | `*.png`, `*.jpg`, `*.woff`, `*.ico` | `chore(assets):` |
+   | 4 | Type definitions | `*.d.ts`, `**/types/**`, `**/interfaces/**` | `chore(types):` |
+   | 5 | Feature by domain | Extract from path (e.g., `/components/auth/` → "auth") | `feat({domain}):` |
+   | 6 | Configuration | `*.config.*`, `.env*`, `*.toml`, `*.yaml` | `chore(config):` |
+   | 7 | Documentation | `*.md`, `docs/**`, `README*` | `docs:` |
+
+   **Chunking rules**:
+   - Extract "feature domain" from paths: `/components/auth/Login.tsx` → "auth"
+   - **Keep tests WITH implementation** (configurable via `test-commit-style` in CLAUDE.md):
+     - `together` (default): `Login.tsx` and `Login.test.tsx` in same commit
+     - `separate`: Tests in their own commit after implementation
+   - Never split a single file across commits
+   - Target 5-15 files per commit (reviewable size)
+   - If a chunk exceeds 15 files, split by subdirectory
+
+5. **Order chunks by dependency**:
+   - Migrations/schema first (other code depends on them)
+   - Dependencies second
+   - Types before implementation
+   - Implementation before tests (if separated)
+   - Configuration after code
+   - Documentation last
+
+6. **Show preview and get confirmation**:
+   ```
+   Proposed reconstruction ({N} clean commits from {M} original):
+
+   1. chore(deps): Update dependencies
+      - package.json
+      - package-lock.json
+
+   2. feat(auth): Add user authentication
+      - src/components/auth/Login.tsx
+      - src/components/auth/Login.test.tsx
+      - src/services/authService.ts
+
+   3. docs: Update README
+      - README.md
+
+   Backup branch: feature-42-backup-1738234567
+   Proceed with reconstruction? [Y/n]
+   ```
+
+   - Wait for user confirmation
+   - If user declines, display: "Skipping reconstruction - keeping original commits" and proceed to Phase 4
+
+7. **Execute reconstruction**:
+   ```bash
+   # Reset to merge base, keeping all changes staged
+   git reset --soft $(git merge-base HEAD origin/main)
+   git reset HEAD  # Unstage all files
+
+   # For each chunk in order:
+   for chunk in chunks:
+       git add ${chunk.files}
+       git commit -m "${chunk.message}"
+   ```
+
+   **Commit message format for reconstructed commits**:
+   ```
+   {prefix} {description}
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+   ```
+
+8. **Verify no code loss**:
+   ```bash
+   # This diff should be empty - same code, different history
+   git diff "${BACKUP_BRANCH}"..HEAD --stat
+   ```
+
+   - If diff is NOT empty:
+     - Display: "⚠️ Code mismatch detected! Rolling back..."
+     - Run: `git reset --hard "${BACKUP_BRANCH}"`
+     - Display: "Restored to backup. Original commits preserved."
+     - Proceed to Phase 4 with original history
+
+   - If diff IS empty:
+     - Display: "✓ Verification passed - no code loss"
+     - Display: "✓ Reconstructed {M} commits into {N} clean commits"
+
+9. **Cleanup** (optional):
+   - The backup branch remains for safety
+   - Display: "Backup branch '{BACKUP_BRANCH}' preserved. Delete with: git branch -D {BACKUP_BRANCH}"
+   - Proceed to Phase 4
 
 ## Phase 4: Push and Create PR
 
@@ -249,6 +380,11 @@ The complete workflow has five phases:
 0. **Verify review was completed**:
    - Phase 3 (Review) must have been executed before reaching this phase
    - If you skipped Phase 3, STOP and go back - do not proceed to push
+
+0.5. **Run history reconstruction**:
+   - Execute Phase 3.5 (Reconstruct History) before proceeding
+   - This will either clean up the history or skip if not needed
+   - Wait for Phase 3.5 to complete before continuing
 
 1. **Validate prerequisites**:
    - Get current branch: `git branch --show-current`
@@ -458,6 +594,16 @@ See `/review-debate` skill for detailed guidance on:
 - Synthesizing debate into actionable decisions
 - FIX NOW vs DEFER vs IGNORE classification criteria
 
+### History Reconstruction Tips
+
+- **Always create backup first** - the backup branch is your safety net
+- **Verify with `git diff`** - after reconstruction, diff against backup must be empty
+- **Domain extraction** - look at the directory structure to group related files
+- **Keep tests together** - by default, keep test files with their implementation
+- **Preserve issue reference** - reconstructed commits should still reference the issue number
+- **Roll back on any error** - if verification fails, restore from backup immediately
+- **Preview before executing** - always show the proposed reconstruction and wait for confirmation
+
 ## Session Transcript Opt-Out
 
 To disable automatic session transcript export for a project, add this to CLAUDE.md:
@@ -471,3 +617,28 @@ This is useful for:
 - Private/sensitive projects where transcripts shouldn't be public
 - Quick fixes where full transcript context isn't valuable
 - Projects with strict data handling requirements
+
+## History Reconstruction Opt-Out
+
+To disable automatic history reconstruction before pushing PRs, add this to CLAUDE.md:
+
+```markdown
+skip-history-reconstruction: true
+```
+
+This is useful for:
+
+- Projects that prefer preserving the raw development history
+- Quick fixes where the commit history is already clean
+- Situations where you want to manually control commit structure
+
+## Test Commit Style Configuration
+
+To control how tests are grouped during history reconstruction, add to CLAUDE.md:
+
+```markdown
+test-commit-style: together   # Keep tests with implementation (default)
+test-commit-style: separate   # Put tests in their own commit after implementation
+```
+
+The `together` style (default) is recommended for easier code review - reviewers see the test alongside the code it tests.

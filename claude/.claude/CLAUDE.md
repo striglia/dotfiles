@@ -6,6 +6,8 @@
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
 - **review-method: codex-review** — Use OpenAI Codex (via `/codex-review`) for self-review in git-workflow Phase 3. Faster than review-debate, external perspective from different model family.
+- **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in git-workflow Phase 3.5). Set `skip-history-reconstruction: true` to disable.
+- **test-commit-style: together** — Keep tests with their implementation in the same commit during history reconstruction. Alternative: `separate` to put tests in their own commit.
 
 ## Subagent Context Management
 
@@ -50,6 +52,15 @@ When editing skills in `~/.claude/skills/`:
 1. Skills are stored in a git repo (dotfiles)
 2. After editing, commit changes: `cd ~/.claude/skills && git add . && git commit -m "Update {skill-name}: {description}"`
 3. Push to remote: `git push`
+
+## Skill File Locations
+
+When looking for skill files (referenced by `/skill-name` or in skill invocations):
+
+1. **Check project-local first**: `.claude/skills/` in the current project directory
+2. **Then check global**: `~/.claude/skills/`
+
+Project-local skills take precedence over global skills with the same name. This allows projects to override or customize global skills.
 
 ## Validate User Assumptions
 
