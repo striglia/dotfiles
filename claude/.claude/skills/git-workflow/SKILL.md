@@ -189,11 +189,6 @@ The complete workflow has six phases:
 
 **Purpose**: Catch issues before they go to human reviewers.
 
-**Review Methods** (configurable via CLAUDE.md `review-method`):
-
-- `review-debate` (default): Adversarial subagent debate with Advocate, Critic, and Principal Engineer
-- `codex-review`: External review using OpenAI Codex in headless mode
-
 **Steps**:
 
 1. **Validate prerequisites**:
@@ -201,13 +196,7 @@ The complete workflow has six phases:
    - If branch is "main", error: "Nothing to review on main branch."
    - Extract issue number from branch name
 
-2. **Check review method configuration**:
-   - Look for `review-method: codex-review` or `review-method: review-debate` in CLAUDE.md
-   - Default to `review-debate` if not specified
-
-3. **Invoke the appropriate review skill**:
-
-   **If review-method is `review-debate` (default):**
+2. **Invoke `/review-debate`**:
 
    Run `/review-debate` with context:
 
@@ -226,18 +215,7 @@ The complete workflow has six phases:
 
    See `/review-debate` skill documentation for full details.
 
-   **If review-method is `codex-review`:**
-
-   Run `/codex-review` which:
-   - Gathers the diff and issue context
-   - Calls Codex CLI in headless mode with a structured review prompt
-   - Processes the review output
-   - Fixes critical issues
-   - Reports results
-
-   See `/codex-review` skill documentation for full details.
-
-4. **Confirm completion**:
+3. **Confirm completion**:
    - Display: "✓ Self-review complete"
    - Display: "Ready for: /git-workflow push (will auto-reconstruct history if needed)"
 

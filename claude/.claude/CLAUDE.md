@@ -5,7 +5,6 @@
 - **auto-git-workflow**: Always use the `/git-workflow` skill (not manual git commands) for feature branch work. Follow the skill step-by-step—every phase is mandatory. Complete phases without pausing for explicit user prompts.
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
-- **review-method: codex-review** — Use OpenAI Codex (via `/codex-review`) for self-review in git-workflow Phase 3. Faster than review-debate, external perspective from different model family.
 - **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in git-workflow Phase 3.5). Set `skip-history-reconstruction: true` to disable.
 - **test-commit-style: together** — Keep tests with their implementation in the same commit during history reconstruction. Alternative: `separate` to put tests in their own commit.
 
