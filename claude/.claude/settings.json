@@ -47,17 +47,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "OUTPUT FORMAT: Return ONLY a JSON object. No prose, no markdown, no explanation. Just the raw JSON.\n\nYou validate plan quality. Analyze the session:\n\n1. IF NOT A PLAN SESSION (no plan file created, no ExitPlanMode used): Output exactly: {\"ok\":true}\n\n2. IF A PLAN WAS CREATED, check for:\n   - SUCCESS CRITERIA: Measurable outcomes (not vague like 'tests pass' or 'works correctly')\n   - STOPPING CONDITIONS: Both completion AND early-termination triggers\n   - VERIFICATION: Concrete checks for each criterion\n\n   If all present: {\"ok\":true}\n   If any missing: {\"ok\":false,\"reason\":\"Missing [X]. Add [specific example].\"}\n\nEXAMPLES OF VALID OUTPUT:\n{\"ok\":true}\n{\"ok\":false,\"reason\":\"Missing stopping conditions. Add: Stop when ALL [...] + Stop EARLY if [...]\"}\n\nOUTPUT JSON ONLY:",
-            "timeout": 60
-          }
-        ]
-      }
     ]
   }
 }
