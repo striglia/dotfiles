@@ -115,6 +115,10 @@ Red flags:
 - Project ARCHITECTURE.md files don't need to duplicate—they reference or apply general principles
 - Project-specific entries only needed when the application is nuanced for that project
 
+**Bidirectional sync:**
+- When adding a principle to a project's ARCHITECTURE.md: Ask if it's general → if so, add here instead
+- When adding a principle to this agent: Vet relevant project ARCHITECTURE.md files for compliance
+
 ## Cross-Verification with ARCHITECTURE.md
 
 **Always check for an ARCHITECTURE.md file at project root or docs/.**
