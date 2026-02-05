@@ -40,21 +40,39 @@ SESSION_FILE=$(ls -t "$SESSION_DIR"/*.jsonl 2>/dev/null | grep -v "agent-" | hea
 echo "Session: $SESSION_FILE"
 ```
 
-### Step 2a: For --gist (upload to GitHub Gist):
+### Step 2: Redact secrets
 
 ```bash
-uvx claude-code-transcripts json "$SESSION_FILE" --gist
+REDACTED_FILE=$(python3 "$HOME/.claude/skills/export-session/redact_secrets.py" scan "$SESSION_FILE")
+if [ $? -ne 0 ]; then
+    echo "ERROR: Secrets detected after redaction. Export aborted."
+    exit 1
+fi
+echo "Using redacted file: $REDACTED_FILE"
+```
+
+### Step 3a: For --gist (upload to GitHub Gist):
+
+```bash
+uvx claude-code-transcripts json "$REDACTED_FILE" --gist
 ```
 
 Returns a gisthost.github.io URL (Simon's fork of gistpreview that handles larger files).
 
-### Step 2b: For --output (local save):
+### Step 3b: For --output (local save):
 
 ```bash
-uvx claude-code-transcripts json "$SESSION_FILE" -o <output_dir>
+uvx claude-code-transcripts json "$REDACTED_FILE" -o <output_dir>
 ```
 
 Creates `index.html` and `page-*.html` files in the output directory.
+
+### Step 4: Cleanup
+
+```bash
+# Remove the temp directory created by redact_secrets.py
+rm -rf "$(dirname "$REDACTED_FILE")"
+```
 
 ## Prerequisites
 
