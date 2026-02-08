@@ -128,3 +128,34 @@ Plans should include these sections to enable autonomous execution:
    - Specific outputs: "Log shows 'Migration complete'"
 
 **Why this matters:** Without clear stopping conditions, agents require user nudges ("yes continue", "keep going") or stop prematurely. Measurable criteria enable autonomous completion.
+
+## Design Reconsideration Rule
+
+If the same approach/test fails 3 times on the same issue, STOP. Reconsider the design — don't brute force.
+- Re-read the requirements
+- Consider alternative approaches
+- Ask the user if assumptions need revisiting
+
+## End-to-End Feature Chain
+
+For research-driven or complex features, chain skills in this order:
+1. `/enrich-plan` — Research approaches, interview for requirements
+2. `/review-debate` — Stress-test the design with adversarial critique
+3. `/plan-to-issues` or `/roadmap-to-milestone-and-issues` — Break into implementable units
+4. `/git-workflow` — Implement each unit (invokes `/tdd-bugfix` for bugs, `/review-debate` before push)
+
+## When Parallel Agents Help (and When They Hurt)
+
+**Use parallel agents for independent analysis** — work where each agent reads the same input and produces a separate, non-conflicting output:
+- `review-debate`: 3 agents reviewing the same diff from different angles
+- Research: multiple agents investigating different approaches simultaneously
+- Multi-perspective critique: each critic writes concerns independently
+
+**Use sequential execution for code that must compose** — work where one agent's output is another's input, or where agents would edit overlapping files:
+- Implementation + tests: the test writer needs to know the implementation's API, types, and behavior
+- Cross-file features: two agents editing files that import each other creates merge conflicts that take longer to resolve than the parallel savings
+- Any work where Agent B's decisions depend on Agent A's choices
+
+**The litmus test**: Can each agent's output be concatenated without conflicts? → Parallel. Do outputs need to be aware of each other? → Sequential.
+
+**Why this matters**: The coordination overhead of parallel code-writing agents (merge conflicts, context loss, redundant work) typically exceeds the time saved. The parent agent that read the issue and understands the codebase is better positioned to do implementation + tests sequentially with full context than two agents doing them in parallel with partial context.
