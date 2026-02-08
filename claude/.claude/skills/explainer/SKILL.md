@@ -170,9 +170,10 @@ The HTML must be **completely self-contained** — all CSS and JS inline. No ext
 GIST_URL=$(gh gist create /tmp/explainer-${SHA}.html --desc "PR Explainer: [branch-name]" 2>&1 | tail -1)
 
 # Derive the viewable URL (renders the HTML in-browser instead of showing source)
-# Extract the gist hash from the URL: https://gist.github.com/username/abc123 → abc123
-GIST_HASH=$(echo "$GIST_URL" | grep -oE '[0-9a-f]{20,}$')
-VIEWABLE_URL="https://gist.githack.com/${GIST_HASH}/raw/explainer-${SHA}.html"
+# Replace gist.github.com with gist.githack.com and append /raw/filename
+# Input:  https://gist.github.com/username/abc123
+# Output: https://gist.githack.com/username/abc123/raw/explainer-${SHA}.html
+VIEWABLE_URL="$(echo "$GIST_URL" | sed 's|gist.github.com|gist.githack.com|')/raw/explainer-${SHA}.html"
 
 echo "Gist: $GIST_URL"
 echo "Viewable: $VIEWABLE_URL"
