@@ -387,8 +387,8 @@ The complete workflow has six phases:
 5. **Create PR**:
    - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
    - Get commit list: `git log origin/main..HEAD --pretty=format:"- %s"`
-   - **Check for explainer gist**: `cat /tmp/explainer-gist-url 2>/dev/null`
-     - If file exists, read the gist URL (first line) for inclusion in PR body
+   - **Check for explainer gist**: `cat /tmp/explainer-gist-url-* 2>/dev/null | head -1`
+     - Explainer files are SHA-suffixed (e.g., `/tmp/explainer-gist-url-af4ba6`). Glob picks up whichever branch's explainer is present.
    - Format PR title: `{issue_title}`
    - Format PR body (with explainer if available):
 
@@ -404,11 +404,11 @@ The complete workflow has six phases:
      {commits}
      ```
 
-     (Omit the explainer line if no `/tmp/explainer-gist-url` file exists)
+     (Omit the explainer line if no `/tmp/explainer-gist-url-*` file exists)
 
    - Run: `gh pr create --title "{pr_title}" --body "{pr_body}" --base main`
    - Get PR URL: `gh pr view --json url -q .url`
-   - Clean up explainer URL file if used: `rm -f /tmp/explainer-gist-url`
+   - Clean up explainer URL file if used: `rm -f /tmp/explainer-gist-url-*`
 
 6. **Cross-session insights check**:
    - Check if `insights.md` or `insights.markdown` exists in the project root

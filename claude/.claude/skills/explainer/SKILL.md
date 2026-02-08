@@ -26,9 +26,22 @@ Generate a self-contained HTML document that tells the story of a branch for cod
 - Include scope boundaries (what's NOT in this PR) only when relevant to prevent confusion
 - The narrative structure should align with the commit structure — if they diverge, that's a signal the commits may need reorganizing
 
+## File Naming
+
+All temp files include a shortened git SHA (last 6 chars of HEAD) to avoid conflicts when multiple branches have explainers in flight:
+
+```bash
+SHA=$(git rev-parse --short=6 HEAD)
+# HTML:     /tmp/explainer-${SHA}.html
+# Gist URL: /tmp/explainer-gist-url-${SHA}-${SHA}
+```
+
 ## Step 1: Gather Context
 
 ```bash
+# Compute the SHA suffix used for all temp files
+SHA=$(git rev-parse --short=6 HEAD)
+
 # Get the base branch
 BASE_BRANCH=$(git merge-base HEAD origin/main)
 
@@ -66,7 +79,7 @@ Before writing HTML, think through:
 
 ## Step 3: Generate the HTML
 
-Write a self-contained HTML file to `/tmp/explainer.html`.
+Write a self-contained HTML file to `/tmp/explainer-${SHA}.html`.
 
 ### Content Guidelines
 
@@ -154,7 +167,7 @@ The HTML must be **completely self-contained** — all CSS and JS inline. No ext
 
 ```bash
 # Create private gist from the HTML file
-GIST_URL=$(gh gist create /tmp/explainer.html --desc "PR Explainer: [branch-name]" 2>&1 | tail -1)
+GIST_URL=$(gh gist create /tmp/explainer-${SHA}.html --desc "PR Explainer: [branch-name]" 2>&1 | tail -1)
 echo "Gist URL: $GIST_URL"
 ```
 
@@ -192,10 +205,10 @@ Save the gist URL for later use:
 
 ```bash
 # Save for git-workflow to pick up
-echo "${GIST_URL}" > /tmp/explainer-gist-url
+echo "${GIST_URL}" > /tmp/explainer-gist-url-${SHA}
 
 # Also save the raw URL
-echo "${RAW_URL}" >> /tmp/explainer-gist-url
+echo "${RAW_URL}" >> /tmp/explainer-gist-url-${SHA}
 ```
 
 Display:
@@ -204,7 +217,7 @@ Explainer uploaded: [gist URL]
 Raw HTML: [raw URL]
 
 No PR found yet. Gist URL saved — will be included when PR is created.
-(Saved to /tmp/explainer-gist-url for /git-workflow to pick up)
+(Saved to /tmp/explainer-gist-url-${SHA} for /git-workflow to pick up)
 ```
 
 ## Integration with /git-workflow
@@ -213,8 +226,8 @@ The `/git-workflow` Phase 4 (Push and Create PR) should check for a saved explai
 
 ```bash
 # In git-workflow Phase 4, before creating PR:
-if [ -f /tmp/explainer-gist-url ]; then
-  EXPLAINER_URL=$(head -1 /tmp/explainer-gist-url)
+if [ -f /tmp/explainer-gist-url-${SHA} ]; then
+  EXPLAINER_URL=$(head -1 /tmp/explainer-gist-url-${SHA})
   # Include in PR body
 fi
 ```
@@ -226,14 +239,14 @@ When detected, prepend the explainer link to the PR body in the same format:
 
 After successfully including in the PR, clean up:
 ```bash
-rm /tmp/explainer-gist-url
+rm /tmp/explainer-gist-url-${SHA}
 ```
 
 ## Error Handling
 
 1. **No commits on branch**: "No changes to explain — branch is identical to main."
 2. **`gh` not authenticated**: "GitHub CLI not authenticated. Run `gh auth login` first."
-3. **Gist creation fails**: Save HTML to `/tmp/explainer.html` and print path. "Gist upload failed. HTML saved locally: /tmp/explainer.html"
+3. **Gist creation fails**: Save HTML to `/tmp/explainer-${SHA}.html` and print path. "Gist upload failed. HTML saved locally: /tmp/explainer-${SHA}.html"
 4. **Very large diff** (>2000 lines): Focus on the most important changes. Note in the explainer: "This is a large change. This explainer focuses on the key decisions and risks."
 
 ## Tips for Claude
