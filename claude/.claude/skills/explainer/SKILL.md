@@ -33,7 +33,7 @@ All temp files include a shortened git SHA (last 6 chars of HEAD) to avoid confl
 ```bash
 SHA=$(git rev-parse --short=6 HEAD)
 # HTML:     /tmp/explainer-${SHA}.html
-# Gist URL: /tmp/explainer-gist-url-${SHA}-${SHA}
+# Gist URL: /tmp/explainer-gist-url-${SHA}
 ```
 
 ## Step 1: Gather Context
@@ -168,17 +168,21 @@ The HTML must be **completely self-contained** — all CSS and JS inline. No ext
 ```bash
 # Create private gist from the HTML file
 GIST_URL=$(gh gist create /tmp/explainer-${SHA}.html --desc "PR Explainer: [branch-name]" 2>&1 | tail -1)
-echo "Gist URL: $GIST_URL"
+
+# Derive the viewable URL (renders the HTML in-browser instead of showing source)
+# Extract the gist hash from the URL: https://gist.github.com/username/abc123 → abc123
+GIST_HASH=$(echo "$GIST_URL" | grep -oE '[0-9a-f]{20,}$')
+VIEWABLE_URL="https://gist.githack.com/${GIST_HASH}/raw/explainer-${SHA}.html"
+
+echo "Gist: $GIST_URL"
+echo "Viewable: $VIEWABLE_URL"
 ```
 
-The gist URL will look like `https://gist.github.com/username/abc123`. The raw HTML is viewable via the "Raw" button on GitHub, or via:
-```
-https://gist.githack.com/username/abc123/raw/explainer.html
-```
+The **viewable URL** is what goes in the PR — it renders the HTML directly in the browser with full interactivity, dark/light mode, etc. The plain gist URL just shows source code on GitHub, which defeats the purpose.
 
 Display both URLs to the user:
-- Gist page: for viewing on GitHub
-- Raw HTML: for direct browser viewing with full interactivity
+- Viewable HTML (for PR link and sharing): the githack URL
+- Gist page (for editing/deleting): the gist.github.com URL
 
 ## Step 5: Link to PR (Detect & Adapt)
 
@@ -188,9 +192,9 @@ Display both URLs to the user:
 # Get current PR body
 CURRENT_BODY=$(gh pr view --json body -q .body)
 
-# Prepend explainer link
+# Prepend explainer link (use viewable URL, not plain gist URL)
 gh pr edit --body "$(cat <<EOF
-> **[PR Explainer](${GIST_URL})** — narrative walkthrough for reviewers
+> **[PR Explainer](${VIEWABLE_URL})** — narrative walkthrough for reviewers
 
 ${CURRENT_BODY}
 EOF
@@ -204,19 +208,16 @@ Display: "Explainer linked in PR description."
 Save the gist URL for later use:
 
 ```bash
-# Save for git-workflow to pick up
-echo "${GIST_URL}" > /tmp/explainer-gist-url-${SHA}
-
-# Also save the raw URL
-echo "${RAW_URL}" >> /tmp/explainer-gist-url-${SHA}
+# Save the viewable URL for git-workflow to pick up (this is the link that goes in the PR)
+echo "${VIEWABLE_URL}" > /tmp/explainer-gist-url-${SHA}
 ```
 
 Display:
 ```
-Explainer uploaded: [gist URL]
-Raw HTML: [raw URL]
+Viewable: [viewable URL]
+Gist: [gist URL]
 
-No PR found yet. Gist URL saved — will be included when PR is created.
+No PR found yet. Viewable URL saved — will be included when PR is created.
 (Saved to /tmp/explainer-gist-url-${SHA} for /git-workflow to pick up)
 ```
 
