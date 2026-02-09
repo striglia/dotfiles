@@ -83,12 +83,34 @@ The complete workflow has six phases:
    - **If in a worktree**: `git pull origin {current_branch}` (or skip if branch has no upstream)
 
 4. **Fetch issue details**:
-   - Run: `gh issue view {issue_num} --json title,state -q '{title: .title, state: .state}'`
-   - Parse the JSON response to extract title and state
+   - Run: `gh issue view {issue_num} --json title,state,body -q '{title: .title, state: .state, body: .body}'`
+   - Parse the JSON response to extract title, state, and body
    - Display: "Issue #{issue_num}: {title}" and "State: {state}"
    - If state is "CLOSED", warn: "Warning: This issue is already closed."
 
-5. **Create feature branch**:
+5. **Scope check** (before creating branch):
+   - Analyze the issue body for scope signals:
+     - Count checklist items (`- [ ]` lines)
+     - Count distinct subsystems mentioned (backend, client, UI, config, docs, hosting, etc.)
+     - Check title for migration/refactor keywords: "migrate", "productionize", "refactor", "overhaul"
+     - Estimate files likely affected based on the scope description
+   - **If any trigger fires** (4+ checklist items, >2 subsystems, migration keyword, or likely >10 files):
+     - Display a scope warning and proposed session split:
+       ```
+       ⚠️ Scope check: This issue looks large ({reason}).
+       Suggested session boundaries:
+         Session 1: {scope} (~N files)
+         Session 2: {scope} (~N files)
+         ...
+       Each session produces an independently committable unit.
+       Want to split into sessions, or tackle it all at once?
+       ```
+     - Wait for user response
+     - If user chooses to split: create a branch for Session 1 only, note the remaining sessions
+     - If user chooses all-at-once: proceed, but note the scope for practice review
+   - **If no triggers fire**: proceed silently (don't slow down small issues)
+
+6. **Create feature branch**:
    - Generate slug from issue title:
      - Convert to lowercase
      - Replace spaces with hyphens
@@ -98,7 +120,7 @@ The complete workflow has six phases:
      - Example: `42-add-user-authentication`
    - Run: `git checkout -b "{branch_name}"`
 
-6. **Confirm success**:
+7. **Confirm success**:
    - Display: "✓ Created branch: {branch_name}"
    - Display next steps:
      ```
