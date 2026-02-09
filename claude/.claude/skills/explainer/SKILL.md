@@ -17,11 +17,11 @@ Generate a self-contained HTML document that tells the story of a branch for cod
 
 ## Philosophy
 
-**This is NOT an annotated diff.** This is a narrative document that educates a code reviewer.
+**This is NOT a second code review.** This is a document that builds intuition — a reviewer who reads it should *get* the change before they ever look at a diff.
 
-- Focus on WHY the code exists, not WHAT the code is
-- Explain the semantic and functional changes in human terms
-- Show code only when it genuinely aids understanding — most of the time, prose is better
+- **Visuals over prose** — diagrams, flow charts, tables, and annotated snippets communicate faster than paragraphs. If you're writing more than 3-4 sentences in a row, ask: would a diagram be clearer?
+- **Build intuition, don't explain every detail** — give the reviewer a mental model of the change, not a line-by-line walkthrough. They can read the code themselves; what they can't get from the diff is the *why* and the *shape* of the decision space.
+- **Make it a delight to read** — this should feel like a well-designed blog post, not a compliance document. Short paragraphs, visual variety, white space, personality. A reviewer should *want* to read it.
 - Flag risks and areas needing scrutiny — guide reviewer attention to high-value areas
 - Include scope boundaries (what's NOT in this PR) only when relevant to prevent confusion
 - The narrative structure should align with the commit structure — if they diverge, that's a signal the commits may need reorganizing
@@ -95,11 +95,12 @@ The structure should align with the final commit structure. If you find yourself
 - Medium PRs (50-200 lines): 5-10 minute read. Explain decisions and trade-offs.
 - Large PRs (200+ lines): 10-15 minute read. Full context, architecture decisions, risk analysis.
 
-**Code inclusion rules**:
-- Default: NO code. Explain in prose.
-- Include code when: the specific implementation IS the decision (algorithm choice, API design, data structure)
-- Include diffs when: the before/after contrast is the clearest way to show what changed
-- Never include code just because it changed — only because seeing it helps understanding
+**Prefer visuals over prose**:
+- **Diagrams** (ASCII or simple HTML/CSS) for request flows, data flows, state transitions, architecture
+- **Tables** for comparisons, option trade-offs, before/after summaries
+- **Annotated code snippets** (short, with callout comments) when the implementation IS the decision
+- **Diff fragments** only when the before/after contrast is the clearest way to show what changed
+- A wall of paragraphs is a failure mode. Break it up visually.
 
 **Risk callouts**:
 - Explicitly flag areas where you want extra reviewer scrutiny
@@ -161,7 +162,7 @@ The HTML must be **completely self-contained** — all CSS and JS inline. No ext
 </html>
 ```
 
-**Quality bar**: The HTML should look like a well-crafted technical blog post. Think Stripe's engineering blog or Julia Evans' explanations — clear, opinionated, educational.
+**Quality bar**: The HTML should feel like a Julia Evans zine or a well-designed Stripe engineering post — visual, opinionated, and something you'd actually enjoy reading. If it reads like a design doc or a code review comment thread, you've missed the mark.
 
 ## Step 4: Upload as Private Gist
 
@@ -253,11 +254,10 @@ rm /tmp/explainer-gist-url-${SHA}
 
 ## Tips for Claude
 
-- **Read commit messages carefully** — they often contain rationale that should be expanded in the narrative
-- **Look at the commit structure** — semantic commits tell you how the author thought about the change
-- **Don't explain obvious code** — if a reviewer can read `if (user.isAdmin)`, you don't need to explain it
-- **DO explain non-obvious choices** — "We used a Map instead of an Object because..."
-- **Be opinionated** — this isn't a neutral description, it's the author explaining their work
+- **Reach for a diagram first** — before writing a paragraph, ask: can I show this as a flow, a table, or an ASCII diagram instead? Visuals build intuition faster than prose.
+- **Build a mental model, not a changelog** — the reader should finish with an intuitive understanding of the change's shape, not a memorized list of what happened. Think "here's how to think about this" not "here's everything that changed."
+- **Keep it tight** — short paragraphs (2-3 sentences max), lots of headings, visual variety. If a section feels like a wall of text, break it up or replace prose with a visual.
+- **Be opinionated and have personality** — this isn't a neutral description, it's the author explaining their work with conviction. It's okay to be casual, direct, even funny where appropriate.
 - **Admit uncertainty** — "I'm not 100% sure this handles the race condition correctly" is more useful than silence
-- **Make it scannable** — bold key terms, use headers, keep paragraphs short
-- **The explainer should make the actual code review faster** — after reading it, the reviewer should know exactly where to focus
+- **Read commit messages carefully** — they often contain rationale that should be expanded in the narrative
+- **The explainer should make the reviewer excited to review** — not obligated. After reading it, they should know exactly where to focus and feel like their time will be well spent.
