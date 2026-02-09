@@ -96,11 +96,34 @@ The structure should align with the final commit structure. If you find yourself
 - Large PRs (200+ lines): 10-15 minute read. Full context, architecture decisions, risk analysis.
 
 **Prefer visuals over prose**:
-- **Diagrams** (ASCII or simple HTML/CSS) for request flows, data flows, state transitions, architecture
+- **Mermaid diagrams** for flows, sequences, state machines, and architecture (see Diagram Guide below)
 - **Tables** for comparisons, option trade-offs, before/after summaries
 - **Annotated code snippets** (short, with callout comments) when the implementation IS the decision
 - **Diff fragments** only when the before/after contrast is the clearest way to show what changed
 - A wall of paragraphs is a failure mode. Break it up visually.
+
+#### Diagram Guide (Mermaid)
+
+Use [Mermaid.js](https://mermaid.js.org/) for all diagrams. Write Mermaid specs inside `<pre class="mermaid">` tags — the library renders them automatically on page load.
+
+**Pick the right diagram type:**
+
+| Scenario | Mermaid Type | Example Use |
+|----------|-------------|-------------|
+| Request/data flow | `flowchart LR` | HTTP request through middleware → handler → DB |
+| Component interaction | `sequenceDiagram` | Service A calls Service B, gets response, updates cache |
+| State changes | `stateDiagram-v2` | PR status: draft → open → review → merged |
+| Before/after architecture | `flowchart TD` (two side-by-side) | Old vs new module structure |
+| Decision tree | `flowchart TD` | "If config exists → load it, else → use defaults" |
+| Timeline/phases | `gantt` | Migration phases or rollout plan |
+| Class/module relationships | `classDiagram` | How new modules relate to existing ones |
+
+**Mermaid authoring tips:**
+- Keep diagrams focused — 5-12 nodes max. Split complex flows into multiple diagrams.
+- Use descriptive node labels: `Auth["Auth Middleware"]` not just `A`
+- Use notes and annotations in sequence diagrams: `Note over A,B: This is the critical path`
+- Style important nodes: `style CriticalNode fill:#f96,stroke:#333`
+- Test your Mermaid syntax mentally — common pitfalls: unquoted labels with special chars, missing direction specifiers
 
 **Risk callouts**:
 - Explicitly flag areas where you want extra reviewer scrutiny
@@ -109,7 +132,7 @@ The structure should align with the final commit structure. If you find yourself
 
 ### HTML Requirements
 
-The HTML must be **completely self-contained** — all CSS and JS inline. No external dependencies.
+The HTML must require **no build step** — all custom CSS and JS inline. CDN-hosted libraries (like Mermaid.js) are fine since the file is always viewed online.
 
 **Design principles**:
 - Clean typography (system font stack, good line-height, readable widths)
@@ -139,8 +162,13 @@ The HTML must be **completely self-contained** — all CSS and JS inline. No ext
        - Color scheme: light default, dark via prefers-color-scheme
        - Subtle visual hierarchy: section dividers, callout boxes for risks
        - Print styles: hide nav, expand all collapsed sections
+       - Mermaid diagrams: center them, give breathing room
     */
+    .mermaid { text-align: center; margin: 1.5em 0; }
   </style>
+  <!-- Mermaid.js for diagram rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
 </head>
 <body>
   <!-- Navigation (if 3+ sections) -->
@@ -254,7 +282,7 @@ rm /tmp/explainer-gist-url-${SHA}
 
 ## Tips for Claude
 
-- **Reach for a diagram first** — before writing a paragraph, ask: can I show this as a flow, a table, or an ASCII diagram instead? Visuals build intuition faster than prose.
+- **Reach for a Mermaid diagram first** — before writing a paragraph, ask: can I show this as a `flowchart`, `sequenceDiagram`, or `stateDiagram-v2` instead? Use `<pre class="mermaid">` blocks. Visuals build intuition faster than prose.
 - **Build a mental model, not a changelog** — the reader should finish with an intuitive understanding of the change's shape, not a memorized list of what happened. Think "here's how to think about this" not "here's everything that changed."
 - **Keep it tight** — short paragraphs (2-3 sentences max), lots of headings, visual variety. If a section feels like a wall of text, break it up or replace prose with a visual.
 - **Be opinionated and have personality** — this isn't a neutral description, it's the author explaining their work with conviction. It's okay to be casual, direct, even funny where appropriate.
