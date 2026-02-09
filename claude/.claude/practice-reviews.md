@@ -72,6 +72,40 @@ Session-by-session reflections on adherence to practices defined in `practices.m
 
 ---
 
+## 2026-02-08 | project: exocortex | overall: 8.6/10
+
+**Session:** W07 tactic creation with exocortex analysis, review section format change, PR
+
+### Conversational over Waterfall
+- **Rating:** 10/10
+- **Evidence:** W07 tactic built through iterative dialogue — redirected on Rock #1, challenged repetitive briefing measure, added Rock #10 mid-session, made real-time edits
+- **Note:** Artifact emerged from conversation, not a spec
+
+### Co-Design in Plan Mode
+- **Rating:** 7/10
+- **Evidence:** Collaborative and exploratory but no formal plan mode; appropriate for vault/content work
+- **Note:** Right call to skip — the tactic itself was the plan
+
+### Steer, Don't Row
+- **Rating:** 10/10
+- **Evidence:** Every contribution was a judgment call — protein shake pivot, cooking-optional reframe, Rock #10, gardener "decide yes/no" framing. Zero time on mechanics.
+- **Note:** Small wording changes with big behavioral implications — that's pure steering
+
+### Build Autonomous Loops
+- **Rating:** 7/10
+- **Evidence:** 130 tests updated and passing; backwards-compatible regex verified programmatically. Vault content inherently outside automation loop.
+- **Note:** Good test discipline on the code side
+
+### Minimize Compaction
+- **Rating:** 9/10
+- **Evidence:** Focused session, one logical unit of work, no context warnings or compaction
+- **Note:** Clean arc from brainstorming → editing → code → PR → explainer
+
+**Highlight:** Textbook "Steer, Don't Row" — every contribution was taste and judgment, zero mechanics
+**Focus:** Consider adding a practice around weekly reflection quality once exocortex analysis has a few weeks of data
+
+---
+
 ## 2026-01-26 | project: dotfiles | overall: 7.6/10
 
 **Session:** Adding Principal Engineer voice to review-debate skill
