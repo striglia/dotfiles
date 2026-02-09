@@ -1,7 +1,7 @@
 ---
 name: explainer
 description: Generate a narrative HTML explainer for the current branch, upload as private gist, and link in PR description. Educates code reviewers about WHY changes were made, not just what changed.
-allowed-tools: Bash(git:*), Bash(gh:*), Bash(cat /tmp/explainer*), Read, Grep, Glob, Write(/tmp/explainer*)
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(cat /tmp/explainer*), Bash(lint-mermaid*), Bash(mmdc:*), Read, Grep, Glob, Write(/tmp/explainer*)
 ---
 
 # PR Explainer
@@ -191,6 +191,27 @@ The HTML must require **no build step** — all custom CSS and JS inline. CDN-ho
 ```
 
 **Quality bar**: The HTML should feel like a Julia Evans zine or a well-designed Stripe engineering post — visual, opinionated, and something you'd actually enjoy reading. If it reads like a design doc or a code review comment thread, you've missed the mark.
+
+## Step 3.5: Validate Mermaid Diagrams
+
+**MANDATORY** — run this before uploading the gist. Mermaid syntax is fragile (parentheses, colons, special chars in labels cause silent render failures).
+
+```bash
+~/.claude/skills/lint-mermaid.sh /tmp/explainer-${SHA}.html
+```
+
+This extracts every `<pre class="mermaid">` block and validates it via `mmdc` (Mermaid CLI). If any block fails:
+
+1. Read the error to identify the problematic syntax
+2. Fix the HTML file
+3. Re-run the linter until all blocks pass
+
+**Common Mermaid pitfalls:**
+- **Parentheses in `stateDiagram` labels** — `()` denotes state descriptions, not grouping. Use `—` or rephrase instead of `(BUG: ...)`.
+- **Colons in labels** — Some diagram types parse `:` as a separator. Rephrase or use quotes.
+- **Special chars in flowchart nodes** — Use quoted labels: `A["Label with (parens)"]` instead of `A(Label with parens)`.
+
+**Prerequisite:** `npm install -g @mermaid-js/mermaid-cli` (one-time setup).
 
 ## Step 4: Upload as Private Gist
 
