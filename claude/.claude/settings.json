@@ -35,6 +35,7 @@
   "enabledPlugins": {
     "swift-lsp@claude-plugins-official": true
   },
+  "cleanupPeriodDays": 99999,
   "hooks": {
     "Notification": [
       {
