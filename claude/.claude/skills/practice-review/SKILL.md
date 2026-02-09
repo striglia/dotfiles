@@ -30,6 +30,7 @@ allowed-tools: Read, Write, Glob, Grep, Task
 
 - **Practices definition:** `~/.claude/practices.md`
 - **Review log:** `~/.claude/practice-reviews.md`
+- **Skill changelog:** `~/.claude/skills/practice-review/CHANGELOG.md` — records how this skill evolves over time (~monthly)
 
 ## Review Process
 
@@ -112,6 +113,44 @@ If user confirms, append to `~/.claude/practice-reviews.md`:
 ---
 
 ```
+
+### Phase 6: Practices Evolution
+
+After logging the review, check whether any practices should evolve. This phase proposes concrete edits to `~/.claude/practices.md` — the user approves or rejects each one.
+
+**Three evolution types:**
+
+**Graduate** — Remove practices that have become habits.
+- Trigger: Consistently 9+ over 5+ sessions
+- Action: Propose moving to a "Graduated" section in practices.md (kept for reference, no longer actively tracked)
+- Rationale: Tracking mastered habits creates noise that dilutes focus on practices that need work
+
+**Add** — Promote emerging patterns to real practices.
+- Trigger: A "Focus for next time" note appears across 2+ reviews, OR a clear new pattern emerges in the session
+- Action: Propose a new practice with name, bullets, and "Signs I'm doing well / slipping"
+- Rationale: The review process sees patterns the user might not notice
+
+**Sharpen** — Split or refine practices with high variance.
+- Trigger: Rating variance > 4 points across sessions (e.g., 3 one week, 10 the next)
+- Action: Propose splitting into sub-practices or adding more specific triggers
+- Rationale: High variance suggests the practice definition is too broad to be actionable
+
+**Format:**
+
+```
+### Practices Evolution
+
+**Graduate "Steer, Don't Row"?**
+Scores: 9, 8, 8, 10 across 4 sessions. This looks like a habit, not a practice.
+→ Move to Graduated section? (y/n)
+
+**Add "Weekly Reflection Quality"?**
+Emerged from two sessions of exocortex analysis work. Proposed definition:
+- [draft practice definition]
+→ Add to practices.md? (y/n)
+```
+
+Only propose evolutions when there's clear evidence. Not every review needs this section — skip it if nothing qualifies. When in doubt, wait another session for more data.
 
 ## Trend Calculation
 
