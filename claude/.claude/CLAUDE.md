@@ -129,6 +129,30 @@ Plans should include these sections to enable autonomous execution:
 
 **Why this matters:** Without clear stopping conditions, agents require user nudges ("yes continue", "keep going") or stop prematurely. Measurable criteria enable autonomous completion.
 
+## Scope Check Before Implementation
+
+Before starting work on any issue or feature, assess scope:
+
+1. **Read the issue body** — count checklist items, subsystems involved, languages touched
+2. **Flag if large** — any of these triggers mean the work should be split:
+   - Touches >2 subsystems (e.g., backend + client + hosting + config)
+   - Has 4+ checklist items or deliverables
+   - Title contains "migrate", "productionize", "refactor", or "overhaul"
+   - Would likely produce >10 changed files or >5 commits
+   - Spans multiple languages/runtimes (e.g., TypeScript + Swift + HTML)
+3. **If flagged, propose session boundaries** — present a split plan to the user:
+   ```
+   This issue looks like it spans N subsystems. I'd suggest splitting into focused sessions:
+   - Session 1: [scope] (~X files)
+   - Session 2: [scope] (~X files)
+   - Session 3: [scope] (~X files)
+   Each session produces an independently committable unit.
+   Want to proceed with Session 1, or tackle it all at once?
+   ```
+4. **Respect the user's choice** — if they say "all at once", proceed. The point is awareness, not gatekeeping.
+
+**Why this matters:** Sessions >10 files consistently score 1-3/10 on practice reviews. Splitting upfront costs 30 seconds; recovering from context blowout costs the whole session.
+
 ## Design Reconsideration Rule
 
 If the same approach/test fails 3 times on the same issue, STOP. Reconsider the design — don't brute force.

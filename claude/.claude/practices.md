@@ -58,9 +58,19 @@ Personal practices I'm actively working to improve. Used by `/practice-review` f
 - Use targeted file reads instead of dumping entire files
 - Be intentional about what context is loaded
 - Exit and restart sessions when context is getting heavy rather than compacting
+- **Assess scope BEFORE starting** — if a task looks large, split into sessions upfront
 
-**Signs I'm doing well:** Sessions end naturally, context stays manageable, no compaction needed
-**Signs I'm slipping:** Hitting context warnings, compacting mid-session, losing important context
+**Scope triggers** (any of these → plan session boundaries first):
+- Issue touches >2 subsystems (e.g., backend + client + hosting)
+- Issue checklist has 4+ items
+- Title contains "migrate", "productionize", "refactor", or "overhaul"
+- Expected output is >10 files or >5 commits
+- Multiple languages/runtimes involved (e.g., TypeScript + Swift + HTML)
+
+**Splitting strategy**: Each session should produce an independently committable unit. Prefer vertical slices (infrastructure → integration → testing → cleanup) over horizontal ones.
+
+**Signs I'm doing well:** Sessions end naturally, scope assessed upfront, proactive splitting, <10 files per session
+**Signs I'm slipping:** Hitting context warnings, 10+ files in a session, "just one more thing" scope creep, no scope check at start
 
 ---
 
