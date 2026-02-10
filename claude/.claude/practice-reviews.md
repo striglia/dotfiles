@@ -72,6 +72,74 @@ Session-by-session reflections on adherence to practices defined in `practices.m
 
 ---
 
+## 2026-02-09 | project: OpenFi | overall: 4.0/10 (retroactive)
+
+**Session:** PR #125 — Productionize Backend: Standardize on Firebase Functions (Issue #113). 46 files, 13 commits, 12,646 additions.
+
+### Conversational over Waterfall
+- **Rating:** 3/10
+- **Evidence:** Entire backend migration built in one session before check-in. 46-file "big reveal."
+- **Note:** Many decision points warranted incremental feedback.
+
+### Co-Design in Plan Mode
+- **Rating:** 2/10
+- **Evidence:** No plan mode for the most architecturally significant PR in the project. Key decisions (rate limiting, security model, URL resolution) made without co-design.
+- **Note:** The session that most needed plan mode.
+
+### Steer, Don't Row
+- **Rating:** 6/10
+- **Evidence:** Good high-level vision (security, testing, runbook) but 12,646 additions suggests insufficient mid-session steering.
+- **Note:** You can't steer what you can't see.
+
+### Build Autonomous Loops
+- **Rating:** 8/10
+- **Evidence:** 19 Jest tests, ESLint, TypeScript compilation, swift build/test, self-review via review-debate. Strongest automation across all sessions.
+- **Note:** Upfront investment in Jest + ESLint pays forward.
+
+### Minimize Compaction
+- **Rating:** 1/10
+- **Evidence:** 46 files, 13 commits in one session. Had 4 natural breakpoints that could have been separate sessions.
+- **Note:** 4 sessions crammed into 1.
+
+**Highlight:** Strongest "Build Autonomous Loops" across all sessions — Jest infra + self-review pipeline.
+**Focus:** Practices compound — plan mode → focused sessions → incremental check-ins. Skipping all at once multiplies the cost.
+
+---
+
+## 2026-02-09 | project: OpenFi | overall: 7.4/10
+
+**Session:** Issue #137 — Audit and fix user-facing URLs to use tryopenfi.com (Firebase auth links, DEPLOYMENT.md)
+
+### Steer, Don't Row
+- **Rating:** 9/10
+- **Evidence:** One issue URL in, one merged PR out. Zero implementation guidance needed.
+- **Note:** Textbook delegation for a well-scoped issue.
+
+### Conversational over Waterfall
+- **Rating:** 7/10
+- **Evidence:** Handed off well-scoped issue, no mid-session check-ins needed given small scope.
+- **Note:** Appropriate for the size — not every session needs deep dialogue.
+
+### Co-Design in Plan Mode
+- **Rating:** 5/10
+- **Evidence:** No plan mode. Subdomain choice (api.tryopenfi.com for auth) decided without discussion.
+- **Note:** "api" in a password reset link might confuse users — worth a quick co-design next time.
+
+### Build Autonomous Loops
+- **Rating:** 6/10
+- **Evidence:** TypeScript build verified, self-review ran. No automated test for link domain (hard to test without real payments).
+- **Note:** Build check was the right minimum for infra changes.
+
+### Minimize Compaction
+- **Rating:** 10/10
+- **Evidence:** Short focused session, single issue, no context pressure.
+- **Note:** Perfect scope for a worktree session.
+
+**Highlight:** Excellent "Steer, Don't Row" — one instruction, one merged PR, almost zero steering needed.
+**Focus:** For infra changes with user-facing implications, a quick plan-mode check-in could surface better options.
+
+---
+
 ## 2026-02-08 | project: exocortex | overall: 8.6/10
 
 **Session:** W07 tactic creation with exocortex analysis, review section format change, PR
