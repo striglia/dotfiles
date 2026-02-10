@@ -17,6 +17,8 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 - **Commands**: `claude/.claude/commands/` - Slash commands
 - **Global CLAUDE.md**: `claude/.claude/CLAUDE.md` - Global instructions for all projects
 
+skip-github-issues: true
+
 ## Workflow
 
 1. Edit files in this repo (changes apply immediately via symlinks)
