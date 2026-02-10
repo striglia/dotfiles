@@ -1,12 +1,12 @@
 ---
 name: git-workflow
-description: Complete GitHub issue workflow - creates feature branch, commits with proper formatting, creates PR. Use when implementing features, fixing bugs, or user says "/git-workflow". MANDATORY - never commit directly to main, always use feature branches and PRs.
+description: Complete feature branch workflow - creates feature branch, commits with proper formatting, creates PR. Works with or without GitHub issues. Use when implementing features, fixing bugs, or user says "/git-workflow". MANDATORY - never commit directly to main, always use feature branches and PRs.
 allowed-tools: Bash(git:*), Bash(gh:*)
 ---
 
-# Git Workflow for GitHub Issues
+# Git Workflow
 
-Complete workflow for implementing features tracked in GitHub Issues.
+Complete workflow for implementing features — works with or without GitHub Issues.
 
 ## When to Use This Skill
 
@@ -18,8 +18,10 @@ Invoke this skill immediately when the user indicates they want you to:
 - Implement a feature tracked by an issue
 - Fix a bug tracked by an issue
 - Make code changes associated with an issue
+- Implement a feature or fix without a GitHub issue
+- Start any feature branch work
 
-**Action: Invoke `/git-workflow {issue-number}` as your FIRST response**
+**Action: Invoke `/git-workflow` (with or without issue number) as your FIRST response**
 
 Do NOT:
 
@@ -33,6 +35,7 @@ The skill handles the complete workflow from start to finish.
 **Explicit invocation**:
 
 - User says `/git-workflow 42` or `/git-workflow {issue-number}`
+- User says `/git-workflow` (no args — will prompt for issue or proceed without one)
 - User says `/git-workflow commit` (when on a feature branch)
 - User says `/git-workflow review` (self-review with subagent debate)
 - User says `/git-workflow push` (auto-runs review, then creates PR)
@@ -40,26 +43,26 @@ The skill handles the complete workflow from start to finish.
 ## Mandatory Rules
 
 1. **NEVER commit directly to main branch**
-2. **ALWAYS create a feature branch from an issue**
-3. **ALWAYS use proper commit message format: `#{number}: {title}`**
+2. **ALWAYS create a feature branch** (from an issue or a description)
+3. **ALWAYS use proper commit message format** (see Commit Message Format section)
 4. **ALWAYS create a Pull Request - never merge without PR**
-5. **ALWAYS include "Closes #{number}" in PR body**
+5. **ALWAYS include "Closes #{number}" in PR body** when working from an issue
 6. **Export session transcript** on initial commit only - run `/export-session --gist` and include URL in commit message (default: ON, opt-out via CLAUDE.md). Follow-up commits (via `/fix-pr-feedback` or manual) do not include transcripts.
 
 ## Core Workflow
 
 The complete workflow has six phases:
 
-1. **Start**: `/git-workflow {issue-number}` - Create feature branch
+1. **Start**: `/git-workflow [issue-number]` - Create feature branch
 2. **Commit**: `/git-workflow commit` - Stage and commit changes
 3. **Review**: `/git-workflow review` - Self-review with subagent debate (MANDATORY)
 3.5. **Reconstruct**: (automatic) - Clean up commit history before push
 4. **Push**: `/git-workflow push` - Push branch and create PR
 5. **Feedback**: `/fix-pr-feedback` - Address reviewer feedback and iterate
 
-## Phase 1: Start Working on Issue
+## Phase 1: Start Working
 
-**When**: User provides an issue number (e.g., `/git-workflow 42`)
+**When**: User invokes `/git-workflow` (with or without an issue number)
 
 **Steps**:
 
@@ -82,13 +85,27 @@ The complete workflow has six phases:
    - **If NOT in a worktree**: `git pull origin main`
    - **If in a worktree**: `git pull origin {current_branch}` (or skip if branch has no upstream)
 
-4. **Fetch issue details**:
+4. **Resolve issue context** (determines `has_issue` for all subsequent phases):
+
+   Resolution order:
+   1. **Explicit issue number provided** (e.g., `/git-workflow 42`): set `has_issue = true`, `issue_num = 42`. This ALWAYS takes precedence, even if `skip-github-issues: true` is set in CLAUDE.md.
+   2. **CLAUDE.md contains `skip-github-issues: true`** and no explicit number: set `has_issue = false`. Prompt the user for a short description of the work (1-2 sentences).
+   3. **No number provided and no opt-out flag**: Ask the user: "Do you have a GitHub issue for this work? (enter number/URL, or 'no')"
+      - If user provides a number/URL: extract issue number, set `has_issue = true`
+      - If user says "no" (or equivalent): set `has_issue = false`. Ask for a short description of the work.
+
+   After this step, two variables flow through all remaining phases:
+   - `has_issue` (bool)
+   - `description` (string — issue title if `has_issue`, user-provided description otherwise)
+
+5. **Fetch issue details** (only if `has_issue = true`):
    - Run: `gh issue view {issue_num} --json title,state,body -q '{title: .title, state: .state, body: .body}'`
    - Parse the JSON response to extract title, state, and body
    - Display: "Issue #{issue_num}: {title}" and "State: {state}"
    - If state is "CLOSED", warn: "Warning: This issue is already closed."
+   - Set `description = {title}`
 
-5. **Scope check** (before creating branch):
+6. **Scope check** (only if `has_issue = true` — skip when working without an issue):
    - Analyze the issue body for scope signals:
      - Count checklist items (`- [ ]` lines)
      - Count distinct subsystems mentioned (backend, client, UI, config, docs, hosting, etc.)
@@ -97,7 +114,7 @@ The complete workflow has six phases:
    - **If any trigger fires** (4+ checklist items, >2 subsystems, migration keyword, or likely >10 files):
      - Display a scope warning and proposed session split:
        ```
-       ⚠️ Scope check: This issue looks large ({reason}).
+       Scope check: This issue looks large ({reason}).
        Suggested session boundaries:
          Session 1: {scope} (~N files)
          Session 2: {scope} (~N files)
@@ -110,18 +127,19 @@ The complete workflow has six phases:
      - If user chooses all-at-once: proceed, but note the scope for practice review
    - **If no triggers fire**: proceed silently (don't slow down small issues)
 
-6. **Create feature branch**:
-   - Generate slug from issue title:
+7. **Create feature branch**:
+   - Generate slug from description:
      - Convert to lowercase
      - Replace spaces with hyphens
      - Remove non-alphanumeric characters except hyphens
      - Truncate to 50 characters
-   - Branch name format: `{issue-number}-{slug}`
-     - Example: `42-add-user-authentication`
+   - Branch name format:
+     - **With issue**: `{issue-number}-{slug}` (e.g., `42-add-user-authentication`)
+     - **Without issue**: `{slug}` (e.g., `add-user-authentication`)
    - Run: `git checkout -b "{branch_name}"`
 
-7. **Confirm success**:
-   - Display: "✓ Created branch: {branch_name}"
+8. **Confirm success**:
+   - Display: "Created branch: {branch_name}"
    - Display next steps:
      ```
      Next steps:
@@ -141,7 +159,7 @@ The complete workflow has six phases:
    - Get current branch: `git branch --show-current`
    - If branch is "main", error: "Cannot commit directly to main. Create a feature branch first."
    - Extract issue number from branch name using regex: `^[0-9]+`
-   - If no issue number found, error: "Cannot extract issue number from branch '{branch}'. Branch should be named like: 42-feature-name"
+   - If no issue number found: set `has_issue = false` (this is normal for issue-free branches)
 
 2. **Check for changes**:
    - Run: `git diff-index --quiet HEAD --`
@@ -175,9 +193,10 @@ The complete workflow has six phases:
      - This creates a permanent record of the initial development session
 
 7. **Create commit**:
-   - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
-   - Format commit message (with transcript if this is the first commit):
+   - **With issue** (`has_issue = true`): Fetch issue title: `gh issue view {issue_num} --json title -q .title`
+   - Format commit message (see Commit Message Format section for full details):
 
+     **With issue** — initial commit (with transcript):
      ```
      #{issue_num}: {issue_title}
 
@@ -188,10 +207,18 @@ The complete workflow has six phases:
      Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
      ```
 
-   - For follow-up commits (no transcript):
-
+     **With issue** — follow-up commits:
      ```
      #{issue_num}: {description of changes}
+
+     🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+     ```
+
+     **Without issue** — all commits:
+     ```
+     {description of changes}
 
      🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -216,17 +243,14 @@ The complete workflow has six phases:
 1. **Validate prerequisites**:
    - Get current branch: `git branch --show-current`
    - If branch is "main", error: "Nothing to review on main branch."
-   - Extract issue number from branch name
+   - Extract issue number from branch name (if present, set `has_issue = true`)
 
 2. **Invoke `/review-debate`**:
 
    Run `/review-debate` with context:
 
-   ```
-   /review-debate
-
-   Context: Code changes for issue #{issue_num}: {issue_title}
-   ```
+   - **With issue**: `Context: Code changes for issue #{issue_num}: {issue_title}`
+   - **Without issue**: `Context: Code changes on branch {branch_name}`
 
    The review-debate skill handles:
    - Gathering the diff and issue context
@@ -390,7 +414,7 @@ The complete workflow has six phases:
    - Get current branch: `git branch --show-current`
    - If branch is "main", error: "Cannot push from main branch."
    - Extract issue number from branch name using regex: `^[0-9]+`
-   - If no issue number found, error: "Cannot extract issue number from branch '{branch}'"
+   - If no issue number found: set `has_issue = false` (this is normal for issue-free branches)
 
 2. **Check for commits to push**:
    - Run: `git diff origin/main..HEAD --quiet && git diff --quiet`
@@ -407,13 +431,15 @@ The complete workflow has six phases:
    - If PR exists, display: "✓ PR already exists: {pr_url}" and exit
 
 5. **Create PR**:
-   - Fetch issue title: `gh issue view {issue_num} --json title -q .title`
+   - **With issue**: Fetch issue title: `gh issue view {issue_num} --json title -q .title`
+   - **Without issue**: Use the first commit subject or branch name as the title
    - Get commit list: `git log origin/main..HEAD --pretty=format:"- %s"`
    - **Check for explainer gist**: `cat /tmp/explainer-gist-url-* 2>/dev/null | head -1`
      - Explainer files are SHA-suffixed (e.g., `/tmp/explainer-gist-url-af4ba6`). Glob picks up whichever branch's explainer is present.
-   - Format PR title: `{issue_title}`
-   - Format PR body (with explainer if available):
+   - Format PR title: `{issue_title}` (with issue) or `{first commit subject / branch slug}` (without issue)
+   - Format PR body:
 
+     **With issue** (with explainer if available):
      ```
      > **[PR Explainer](GIST_URL)** — narrative walkthrough for reviewers
 
@@ -426,7 +452,19 @@ The complete workflow has six phases:
      {commits}
      ```
 
+     **Without issue**:
+     ```
+     > **[PR Explainer](GIST_URL)** — narrative walkthrough for reviewers
+
+     ## Summary
+     {description}
+
+     ## Changes
+     {commits}
+     ```
+
      (Omit the explainer line if no `/tmp/explainer-gist-url-*` file exists)
+     (Omit the `Closes #` line when `has_issue = false`)
 
    - Run: `gh pr create --title "{pr_title}" --body "{pr_body}" --base main`
    - Get PR URL: `gh pr view --json url -q .url`
@@ -443,7 +481,9 @@ The complete workflow has six phases:
      - **Generalizable**: Applies beyond the specific ticket
    - If nothing qualifies, skip to step 7 — not every branch produces an insight
    - If something qualifies, append a new entry to the insights file following its existing format
-   - Stage and commit: `git add insights.md && git commit -m "#{issue_num}: Add cross-session insight"`
+   - Stage and commit:
+     - **With issue**: `git add insights.md && git commit -m "#{issue_num}: Add cross-session insight"`
+     - **Without issue**: `git add insights.md && git commit -m "Add cross-session insight"`
    - Push: `git push`
 
 7. **Confirm success**:
@@ -486,7 +526,7 @@ The complete workflow has six phases:
 4. **Merge when approved**:
    - Once reviewers approve and CI passes, PR is ready to merge
    - User or maintainer merges on GitHub
-   - GitHub automatically closes the linked issue (via "Closes #{number}")
+   - If linked to an issue, GitHub automatically closes the linked issue (via "Closes #{number}")
    - GitHub automatically deletes the feature branch (if configured)
 
 **Key principles**:
@@ -500,6 +540,8 @@ The complete workflow has six phases:
 **For detailed workflow**: See `/fix-pr-feedback` command documentation
 
 ## Branch Naming Convention
+
+### With Issue
 
 **Format**: `{issue-number}-{slug}`
 
@@ -515,7 +557,25 @@ The complete workflow has six phases:
 - No ambiguity - each branch maps to exactly one issue
 - Human-readable and git-friendly
 
+### Without Issue
+
+**Format**: `{slug}`
+
+**Examples**:
+
+- "Fix wasteful test process" → `fix-wasteful-test-process`
+- "Add user authentication" → `add-user-authentication`
+- "Update API to use GraphQL" → `update-api-to-use-graphql`
+
+**Why this format**:
+
+- No leading number means `has_issue = false` is detected automatically by later phases
+- Same slug rules as with-issue branches (lowercase, hyphens, truncated to 50 chars)
+- Human-readable and git-friendly
+
 ## Commit Message Format
+
+### With Issue
 
 **Format**: `#{issue-number}: {title-or-description}`
 
@@ -547,10 +607,41 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - Follow-up: `#8: Fix formatting for CI` (no transcript)
 - Follow-up: `#8: Address review feedback on error handling` (no transcript)
 
-**Why this format**:
+### Without Issue
 
-- GitHub automatically links to issue
-- Clear traceability
+**Format**: `{description of changes}` (no `#N:` prefix)
+
+**Initial commit** (with transcript, unless opted out):
+
+```
+{description of changes}
+
+Transcript: {gist-url}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
+**Follow-up commits** (no transcript):
+
+```
+{description of changes}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
+**Examples**:
+
+- Initial: `Fix wasteful test process and auto-run behavior` (with transcript)
+- Follow-up: `Fix formatting for CI` (no transcript)
+
+### Why this format
+
+- With issue: GitHub automatically links to issue for traceability
+- Without issue: Clean commit messages without dead `#N:` references
 - Consistent across all commits in the project
 - Transcript link on initial commit provides full context of LLM-assisted development (à la Simon Willison)
 - Follow-up commits don't need separate transcripts - they're part of the same PR context
@@ -575,18 +666,20 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
    - Error: Network connectivity
    - Solution: Tell user to check internet connection
 
-5. **Issue number extraction fails**
-   - Error: Branch name doesn't follow convention
-   - Solution: Branch must start with issue number (e.g., `42-feature-name`)
+5. **No issue number in branch name**
+   - This is NOT an error — it means an issue-free branch
+   - Set `has_issue = false` and proceed with the workflow
+   - All phases handle the `has_issue = false` case gracefully
 
 ## Tips for Claude
 
 - Always show the user what you're doing at each step
 - If git/gh commands fail, display the error and explain what went wrong
 - The workflow is rigid by design - follow the exact steps
-- Issue number is the single source of truth (stored in branch name)
+- When `has_issue = true`, issue number is the single source of truth (stored in branch name)
+- When `has_issue = false`, the branch slug and description drive naming and commit messages
 - Multiple commits to same branch are fine - all will be included in PR
-- If user is already on a feature branch, detect issue number automatically
+- If user is already on a feature branch, detect issue number automatically (if present)
 - **Worktree detection**: Check `git rev-parse --git-dir` vs `git rev-parse --git-common-dir` - if they differ, you're in a worktree. Worktrees can't checkout `main` (it's already checked out in the main repo), so create feature branches from the worktree's current branch instead.
 - Generate transcript with `/export-session --gist` on the **initial commit only** (unless `skip-session-transcripts: true` in CLAUDE.md)
 - Include the transcript URL in the first commit message for full development context
@@ -607,7 +700,7 @@ See `/review-debate` skill for detailed guidance on:
 - **Verify with `git diff`** - after reconstruction, diff against backup must be empty
 - **Domain extraction** - look at the directory structure to group related files
 - **Keep tests together** - by default, keep test files with their implementation
-- **Preserve issue reference** - reconstructed commits should still reference the issue number
+- **Preserve issue reference** - if the branch is issue-linked, reconstructed commits should still reference the issue number
 - **Roll back on any error** - if verification fails, restore from backup immediately
 - **Preview before executing** - always show the proposed reconstruction and wait for confirmation
 
@@ -649,3 +742,26 @@ test-commit-style: separate   # Put tests in their own commit after implementati
 ```
 
 The `together` style (default) is recommended for easier code review - reviewers see the test alongside the code it tests.
+
+## GitHub Issues Opt-Out
+
+To skip the GitHub issue prompt for all invocations in a project, add this to CLAUDE.md:
+
+```markdown
+skip-github-issues: true
+```
+
+When this flag is set:
+
+- `/git-workflow` (no args) skips the "Do you have a GitHub issue?" prompt and goes straight to asking for a description
+- Branch names use `{slug}` format (no issue number prefix)
+- Commit messages omit the `#{N}:` prefix
+- PRs omit the `Closes #{N}` line
+
+**Override**: An explicit issue number always takes precedence. `/git-workflow 42` uses the issue even with the opt-out flag set.
+
+This is useful for:
+
+- Personal/hobby repos without issue tracking
+- Small projects where issues add overhead
+- Repos that use a different task tracker (Jira, Linear, etc.)

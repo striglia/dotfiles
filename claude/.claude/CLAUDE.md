@@ -7,6 +7,7 @@
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
 - **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in git-workflow Phase 3.5). Set `skip-history-reconstruction: true` to disable.
 - **test-commit-style: together** — Keep tests with their implementation in the same commit during history reconstruction. Alternative: `separate` to put tests in their own commit.
+- **skip-github-issues**: Set `skip-github-issues: true` in a project's CLAUDE.md to skip the GitHub issue prompt during `/git-workflow`. Branches use `{slug}` format, commits omit `#{N}:` prefix, PRs omit `Closes #{N}`. An explicit issue number (e.g., `/git-workflow 42`) always overrides this flag.
 
 ## Subagent Context Management
 
