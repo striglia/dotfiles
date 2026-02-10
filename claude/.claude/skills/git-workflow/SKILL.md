@@ -193,38 +193,8 @@ The complete workflow has six phases:
      - This creates a permanent record of the initial development session
 
 7. **Create commit**:
-   - **With issue** (`has_issue = true`): Fetch issue title: `gh issue view {issue_num} --json title -q .title`
-   - Format commit message (see Commit Message Format section for full details):
-
-     **With issue** — initial commit (with transcript):
-     ```
-     #{issue_num}: {issue_title}
-
-     Transcript: {gist_url}  # Only on initial commit
-
-     🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-     ```
-
-     **With issue** — follow-up commits:
-     ```
-     #{issue_num}: {description of changes}
-
-     🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-     ```
-
-     **Without issue** — all commits:
-     ```
-     {description of changes}
-
-     🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-     Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-     ```
-
+   - **With issue**: Fetch issue title: `gh issue view {issue_num} --json title -q .title`
+   - Format commit message per the Commit Message Format section (with/without issue prefix, transcript on initial commit only)
    - Run: `git commit -m "{commit_msg}"`
 
 8. **Confirm success**:
@@ -438,23 +408,10 @@ The complete workflow has six phases:
      - Explainer files are SHA-suffixed (e.g., `/tmp/explainer-gist-url-af4ba6`). Glob picks up whichever branch's explainer is present.
    - Format PR title: `{issue_title}` (with issue) or `{first commit subject / branch slug}` (without issue)
    - Format PR body:
-
-     **With issue** (with explainer if available):
      ```
-     > **[PR Explainer](GIST_URL)** — narrative walkthrough for reviewers
+     > **[PR Explainer](GIST_URL)** — narrative walkthrough for reviewers  ← omit if no /tmp/explainer-gist-url-* file
 
-     Closes #{issue_num}
-
-     ## Summary
-     {issue_title}
-
-     ## Changes
-     {commits}
-     ```
-
-     **Without issue**:
-     ```
-     > **[PR Explainer](GIST_URL)** — narrative walkthrough for reviewers
+     Closes #{issue_num}  ← omit when has_issue = false
 
      ## Summary
      {description}
@@ -462,9 +419,6 @@ The complete workflow has six phases:
      ## Changes
      {commits}
      ```
-
-     (Omit the explainer line if no `/tmp/explainer-gist-url-*` file exists)
-     (Omit the `Closes #` line when `has_issue = false`)
 
    - Run: `gh pr create --title "{pr_title}" --body "{pr_body}" --base main`
    - Get PR URL: `gh pr view --json url -q .url`
@@ -492,276 +446,65 @@ The complete workflow has six phases:
 
 ## Phase 5: Feedback Loop with Reviewers
 
-**When**: After PR is created and reviewers provide feedback
+**When**: After PR is created and reviewers provide feedback.
 
-**Overview**: Iterate with reviewers to finalize the PR before merging.
+Run `/fix-pr-feedback` (auto-detects PR from current branch) or `/fix-pr-feedback {pr-url}`. Iterate until reviewers approve and CI passes. See `/fix-pr-feedback` skill for full details.
 
-**Process**:
-
-1. **Wait for review feedback**:
-   - Reviewers comment on PR with suggestions, questions, or requested changes
-   - CI/CD checks may fail and require fixes
-   - GitHub will notify you of new comments
-
-2. **Address feedback using `/fix-pr-feedback`**:
-   - Run: `/fix-pr-feedback` (auto-detects PR from current branch)
-   - Or: `/fix-pr-feedback {pr-url}` (specify PR explicitly)
-
-   This command will:
-   - Fetch all review comments since last commit
-   - Filter out non-actionable feedback (bot messages, status updates)
-   - Check for failing CI/test runs and investigate failures
-   - Analyze feedback and make wise decisions about what to implement
-   - Fix critical issues and low-effort improvements
-   - Skip items already tracked in GitHub issues (defer to future work)
-   - Create focused commits for each category of fixes
-   - Push updates to the PR
-   - Comment on PR explaining decisions and rationale
-
-3. **Iterate as needed**:
-   - Reviewers may request additional changes
-   - Run `/fix-pr-feedback` again to address new comments
-   - Continue until reviewers approve
-
-4. **Merge when approved**:
-   - Once reviewers approve and CI passes, PR is ready to merge
-   - User or maintainer merges on GitHub
-   - If linked to an issue, GitHub automatically closes the linked issue (via "Closes #{number}")
-   - GitHub automatically deletes the feature branch (if configured)
-
-**Key principles**:
-
-- Be responsive to feedback - address comments promptly
-- Make wise decisions - not all feedback requires immediate action
-- Communicate clearly - explain your decisions in PR comments
-- Keep commits focused - group related fixes together
-- Test thoroughly - ensure fixes don't break existing functionality
-
-**For detailed workflow**: See `/fix-pr-feedback` command documentation
+On merge: if linked to an issue, GitHub auto-closes it via the `Closes #{number}` line.
 
 ## Branch Naming Convention
 
-### With Issue
+Slug rules: lowercase, spaces→hyphens, strip non-alphanumeric (except hyphens), truncate to 50 chars.
 
-**Format**: `{issue-number}-{slug}`
+- **With issue**: `{issue-number}-{slug}` — e.g., `42-add-user-authentication`
+- **Without issue**: `{slug}` — e.g., `add-user-authentication`
 
-**Examples**:
-
-- Issue #8: "Fix wasteful test process" → `8-fix-wasteful-test-process`
-- Issue #42: "Add user authentication" → `42-add-user-authentication`
-- Issue #123: "Update API to use GraphQL instead of REST" → `123-update-api-to-use-graphql-instead-of-rest`
-
-**Why this format**:
-
-- Issue number at start enables easy extraction with regex `^[0-9]+`
-- No ambiguity - each branch maps to exactly one issue
-- Human-readable and git-friendly
-
-### Without Issue
-
-**Format**: `{slug}`
-
-**Examples**:
-
-- "Fix wasteful test process" → `fix-wasteful-test-process`
-- "Add user authentication" → `add-user-authentication`
-- "Update API to use GraphQL" → `update-api-to-use-graphql`
-
-**Why this format**:
-
-- No leading number means `has_issue = false` is detected automatically by later phases
-- Same slug rules as with-issue branches (lowercase, hyphens, truncated to 50 chars)
-- Human-readable and git-friendly
+Issue number at start enables extraction via regex `^[0-9]+`. No leading number → `has_issue = false`.
 
 ## Commit Message Format
 
-### With Issue
+Subject line: `#{issue-number}: {description}` (with issue) or `{description}` (without issue).
 
-**Format**: `#{issue-number}: {title-or-description}`
-
-**Initial commit** (with transcript, unless opted out):
+**Template** (initial commit includes Transcript line; follow-ups omit it):
 
 ```
-#{issue-number}: {issue-title}
+[#{N}: ]{description}        ← #{N}: prefix only when has_issue
 
-Transcript: {gist-url}
+Transcript: {gist-url}       ← initial commit only (unless skip-session-transcripts)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```
 
-**Follow-up commits** (no transcript):
-
-```
-#{issue-number}: {description of changes}
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-```
-
-**Examples**:
-
-- Initial: `#8: Fix wasteful test process and auto-run behavior` (with transcript)
-- Follow-up: `#8: Fix formatting for CI` (no transcript)
-- Follow-up: `#8: Address review feedback on error handling` (no transcript)
-
-### Without Issue
-
-**Format**: `{description of changes}` (no `#N:` prefix)
-
-**Initial commit** (with transcript, unless opted out):
-
-```
-{description of changes}
-
-Transcript: {gist-url}
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-```
-
-**Follow-up commits** (no transcript):
-
-```
-{description of changes}
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
-```
-
-**Examples**:
-
-- Initial: `Fix wasteful test process and auto-run behavior` (with transcript)
-- Follow-up: `Fix formatting for CI` (no transcript)
-
-### Why this format
-
-- With issue: GitHub automatically links to issue for traceability
-- Without issue: Clean commit messages without dead `#N:` references
-- Consistent across all commits in the project
-- Transcript link on initial commit provides full context of LLM-assisted development (à la Simon Willison)
-- Follow-up commits don't need separate transcripts - they're part of the same PR context
+**Examples**: `#8: Fix wasteful test process` (with issue) · `Fix wasteful test process` (without issue)
 
 ## Error Handling
 
-**Common errors and solutions**:
-
-1. **"gh: command not found"**
-   - Error: GitHub CLI not installed
-   - Solution: Tell user to install: `brew install gh` (macOS) or see https://cli.github.com/
-
-2. **"fatal: not a git repository"**
-   - Error: Not in a git repository
-   - Solution: Tell user to initialize git or navigate to correct directory
-
-3. **"error: remote origin already exists"** or git network errors
-   - Error: Git/GitHub connectivity issue
-   - Solution: Have user check git remote configuration: `git remote -v`
-
-4. **"could not resolve host github.com"**
-   - Error: Network connectivity
-   - Solution: Tell user to check internet connection
-
-5. **No issue number in branch name**
-   - This is NOT an error — it means an issue-free branch
-   - Set `has_issue = false` and proceed with the workflow
-   - All phases handle the `has_issue = false` case gracefully
+- **`gh` not found**: Tell user to install GitHub CLI (`brew install gh`)
+- **Not a git repo / network errors**: Display error, tell user to check setup (`git remote -v`, internet)
+- **No issue number in branch name**: NOT an error — set `has_issue = false` and proceed normally
 
 ## Tips for Claude
 
-- Always show the user what you're doing at each step
-- If git/gh commands fail, display the error and explain what went wrong
-- The workflow is rigid by design - follow the exact steps
-- When `has_issue = true`, issue number is the single source of truth (stored in branch name)
-- When `has_issue = false`, the branch slug and description drive naming and commit messages
-- Multiple commits to same branch are fine - all will be included in PR
-- If user is already on a feature branch, detect issue number automatically (if present)
-- **Worktree detection**: Check `git rev-parse --git-dir` vs `git rev-parse --git-common-dir` - if they differ, you're in a worktree. Worktrees can't checkout `main` (it's already checked out in the main repo), so create feature branches from the worktree's current branch instead.
-- Generate transcript with `/export-session --gist` on the **initial commit only** (unless `skip-session-transcripts: true` in CLAUDE.md)
-- Include the transcript URL in the first commit message for full development context
-- Follow-up commits (fixes, feedback responses) don't need transcripts - they're part of the same PR
-- This follows Simon Willison's approach: https://simonwillison.net/2025/Dec/25/claude-code-transcripts/
+- Show the user what you're doing at each step; display errors with explanations
+- The workflow is rigid by design — follow the exact steps in order
+- `has_issue = true`: issue number is the source of truth (from branch name regex `^[0-9]+`)
+- `has_issue = false`: branch slug and description drive naming and commit messages
+- If already on a feature branch, detect issue number automatically (if present)
+- **Worktree detection**: `git rev-parse --git-dir` vs `--git-common-dir` — if they differ, you're in a worktree. Create branches from current branch (can't checkout `main`).
+- **Transcripts**: initial commit only, via `/export-session --gist` (unless `skip-session-transcripts: true`)
+- **Self-review**: see `/review-debate` skill for Advocate/Critic subagent details
+- **History reconstruction**: always backup first, verify with `git diff`, roll back on mismatch. If branch is issue-linked, preserve the issue number reference in reconstructed commits.
 
-### Self-Review Phase Tips
+## CLAUDE.md Configuration Flags
 
-See `/review-debate` skill for detailed guidance on:
+Add any of these to a project's CLAUDE.md to customize behavior:
 
-- Spawning parallel Advocate and Critic subagents
-- Synthesizing debate into actionable decisions
-- FIX NOW vs DEFER vs IGNORE classification criteria
-
-### History Reconstruction Tips
-
-- **Always create backup first** - the backup branch is your safety net
-- **Verify with `git diff`** - after reconstruction, diff against backup must be empty
-- **Domain extraction** - look at the directory structure to group related files
-- **Keep tests together** - by default, keep test files with their implementation
-- **Preserve issue reference** - if the branch is issue-linked, reconstructed commits should still reference the issue number
-- **Roll back on any error** - if verification fails, restore from backup immediately
-- **Preview before executing** - always show the proposed reconstruction and wait for confirmation
-
-## Session Transcript Opt-Out
-
-To disable automatic session transcript export for a project, add this to CLAUDE.md:
-
-```markdown
-skip-session-transcripts: true
-```
-
-This is useful for:
-
-- Private/sensitive projects where transcripts shouldn't be public
-- Quick fixes where full transcript context isn't valuable
-- Projects with strict data handling requirements
-
-## History Reconstruction Opt-Out
-
-To disable automatic history reconstruction before pushing PRs, add this to CLAUDE.md:
-
-```markdown
-skip-history-reconstruction: true
-```
-
-This is useful for:
-
-- Projects that prefer preserving the raw development history
-- Quick fixes where the commit history is already clean
-- Situations where you want to manually control commit structure
-
-## Test Commit Style Configuration
-
-To control how tests are grouped during history reconstruction, add to CLAUDE.md:
-
-```markdown
-test-commit-style: together   # Keep tests with implementation (default)
-test-commit-style: separate   # Put tests in their own commit after implementation
-```
-
-The `together` style (default) is recommended for easier code review - reviewers see the test alongside the code it tests.
-
-## GitHub Issues Opt-Out
-
-To skip the GitHub issue prompt for all invocations in a project, add this to CLAUDE.md:
-
-```markdown
-skip-github-issues: true
-```
-
-When this flag is set:
-
-- `/git-workflow` (no args) skips the "Do you have a GitHub issue?" prompt and goes straight to asking for a description
-- Branch names use `{slug}` format (no issue number prefix)
-- Commit messages omit the `#{N}:` prefix
-- PRs omit the `Closes #{N}` line
-
-**Override**: An explicit issue number always takes precedence. `/git-workflow 42` uses the issue even with the opt-out flag set.
-
-This is useful for:
-
-- Personal/hobby repos without issue tracking
-- Small projects where issues add overhead
-- Repos that use a different task tracker (Jira, Linear, etc.)
+| Flag | Effect |
+|---|---|
+| `skip-session-transcripts: true` | Skip `/export-session --gist` on initial commit |
+| `skip-history-reconstruction: true` | Skip Phase 3.5 history cleanup before push |
+| `skip-github-issues: true` | Skip issue prompt; use description-only branches. Explicit `/git-workflow 42` still overrides. |
+| `test-commit-style: together` | (default) Keep tests with implementation in reconstruction |
+| `test-commit-style: separate` | Put tests in their own commit during reconstruction |
