@@ -242,19 +242,12 @@ The complete workflow has six phases:
 **Purpose**: Transform messy development history (try A, fix typo, try B, WIP) into clean, semantic commits optimized for code reviewers.
 
 **Skip Conditions** (check these first):
-- Only 1-2 commits on branch (nothing to clean up)
-- All commits already look semantic (no "fix typo", "WIP", iteration patterns)
 - User has `skip-history-reconstruction: true` in CLAUDE.md
 - User explicitly skips at preview prompt
 
 **Steps**:
 
 1. **Check skip conditions**:
-   - Count commits: `git rev-list --count origin/main..HEAD`
-   - If ≤ 2 commits, display: "Only {n} commits - skipping reconstruction" and proceed to Phase 4
-   - Read commit messages: `git log origin/main..HEAD --pretty=format:"%s"`
-   - Check for messy patterns (case-insensitive): "fix", "typo", "wip", "temp", "try", "test", "debug", "cleanup", "oops"
-   - If no messy patterns found, display: "Commits already look clean - skipping reconstruction" and proceed to Phase 4
    - Check if CLAUDE.md contains `skip-history-reconstruction: true` - if so, skip
 
 2. **Create safety backup**:
