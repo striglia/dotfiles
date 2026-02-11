@@ -62,11 +62,17 @@ Be specific. Quote or reference actual moments from the session.
 
 ### Phase 3: Rate and Reflect
 
-For each relevant practice:
+For each relevant **active** practice:
 1. **Rating:** 1-10 scale based on evidence
 2. **Evidence:** Specific examples from this session
 3. **Trend:** Compare to recent sessions (↑ improving, → stable, ↓ slipping)
 4. **Note:** One sentence on what went well or what to focus on
+
+For each relevant **graduated (probationary)** practice:
+1. **Rating:** Still rate internally using the same 1-10 scale
+2. **Only surface to user if score < 7** — if 7+, these practices stay quiet
+3. If < 7 in this session, flag it: include in the review with a regression warning
+4. Track consecutive sub-7 scores; two in a row triggers re-activation proposal
 
 ### Phase 4: Present to User
 
@@ -78,12 +84,16 @@ Format output as:
 **Session:** [brief description of what was worked on]
 **Project:** [project name if identifiable]
 
-### [Practice Name]
+### [Active Practice Name]
 - **Rating:** X/10 [trend arrow if history exists]
 - **Evidence:** [specific examples from session]
 - **Note:** [observation or suggestion]
 
-### [Next Practice...]
+### [Next Active Practice...]
+
+### Graduated practices: [holding steady | ⚠️ regression]
+- If all graduated practices scored 7+: "Holding steady — no regression."
+- If any scored < 7: Show full rating + evidence + regression warning for those practices only.
 
 ---
 
@@ -120,10 +130,12 @@ After logging the review, check whether any practices should evolve. This phase 
 
 **Three evolution types:**
 
-**Graduate** — Remove practices that have become habits.
-- Trigger: Consistently 9+ over 5+ sessions
-- Action: Propose moving to a "Graduated" section in practices.md (kept for reference, no longer actively tracked)
-- Rationale: Tracking mastered habits creates noise that dilutes focus on practices that need work
+**Graduate (Probationary)** — Quiet down practices that have become habits.
+- Trigger: Consistently 8+ over 5+ sessions (or 9+ over 4+)
+- Action: Propose moving to "Graduated (Probationary)" section in practices.md
+- Effect: Still rated every session, but only surfaced to user if score drops below 7
+- Re-activation: Two consecutive sessions below 7 → propose moving back to active
+- Rationale: Tracking mastered habits creates noise, but probationary status catches regression
 
 **Add** — Promote emerging patterns to real practices.
 - Trigger: A "Focus for next time" note appears across 2+ reviews, OR a clear new pattern emerges in the session
@@ -151,6 +163,61 @@ Emerged from two sessions of exocortex analysis work. Proposed definition:
 ```
 
 Only propose evolutions when there's clear evidence. Not every review needs this section — skip it if nothing qualifies. When in doubt, wait another session for more data.
+
+### Phase 7: Practices Audit (Periodic)
+
+After Phase 6, check whether a full practices audit is due. This is the "zoom out" step — instead of evolving one practice at a time, review the entire system.
+
+**Trigger:** Count reviews in `practice-reviews.md` since the last audit entry (entries tagged `(audit)` in the header). If 8+ reviews since last audit, or no audit has ever been done, suggest:
+
+```
+You have N reviews since the last practices audit. Want to do a full audit of your practices?
+This looks at the whole history — trends, plateaus, graduation candidates, and whether the practice set is still serving you.
+```
+
+**If user accepts, run the audit:**
+
+1. **Parse all review history** — extract every rating for every practice
+2. **Compute statistics per practice:**
+   - Average rating (all-time and last 5 sessions)
+   - Variance (max - min across all sessions)
+   - Trend (improving, stable, slipping)
+3. **Present summary table:**
+
+```
+| Practice | Avg (all) | Avg (last 5) | Variance | Signal |
+|----------|-----------|--------------|----------|--------|
+| Practice 1 | 7.2 | 8.0 | Low | Improving |
+| Practice 2 | 6.0 | 6.1 | Very high | Sharpen? |
+```
+
+4. **Identify candidates** for each evolution type:
+   - **Graduate:** avg 8+ over 5+ sessions, low variance
+   - **Sharpen:** variance > 4 points, or stable plateau for 5+ sessions
+   - **Add:** recurring "Focus" notes (2+ mentions), emerging patterns
+   - **Re-activate:** graduated practice with regression
+   - **Retire:** practice no longer relevant to current work
+5. **Propose specific edits** to `practices.md` for each candidate
+6. **Log the audit** as a special entry in `practice-reviews.md`:
+
+```markdown
+## [YYYY-MM-DD] | practices audit (audit)
+
+**Reviews analyzed:** N (since [date])
+
+### Changes Made
+- Graduated: [list]
+- Sharpened: [list]
+- Added: [list]
+- No change: [list]
+
+### Statistics
+[summary table]
+
+---
+```
+
+**If user declines:** Note the count and move on. Don't re-prompt until 4 more reviews accumulate.
 
 ## Trend Calculation
 

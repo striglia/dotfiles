@@ -24,41 +24,32 @@ Personal practices I'm actively working to improve. Used by `/practice-review` f
 **Signs I'm doing well:** Starting sessions in plan mode, sharing rough ideas, exploring alternatives before building
 **Signs I'm slipping:** Arriving with fully-formed specs, skipping design discussion, treating Claude as executor not collaborator
 
-### Steer, Don't Row
-- Spend time on requirements and direction, not implementation details
-- Focus on injecting taste and wisdom - that's the highest-leverage use of my time
-- Let Claude handle the mechanical work while I focus on "what" and "why"
-- Stay out of unimportant implementation details
-- My value-add is judgment, priorities, and quality standards
-
-**Signs I'm doing well:** Giving feedback on direction and quality, delegating implementation, focusing on requirements clarity
-**Signs I'm slipping:** Dictating implementation details, micro-managing code style, doing work Claude could do
-
 ---
 
 ## Automation & Feedback Loops
 
 ### Build Autonomous Loops
 - Invest in automation that lets Claude operate without manual check-ins
+- **Build test infrastructure at project/feature start**, not piecemeal per-bug
+- Set up the testing framework, CI, linting *before* the first feature — not after the third bug
 - Don't do manual testing when you can write automated tests
 - Don't inspect logs by hand when logs can be made available to Claude
 - Don't verify by hand when you can write assertions or tests
 - Use TDD loops, compilation, type checking, formatting as automated feedback
 - Goal: reduce ambiguity in the design space and close loops faster
 
-**Signs I'm doing well:** Writing tests before asking Claude to implement, setting up tooling that Claude can run, investing in automation upfront
-**Signs I'm slipping:** Being the human-in-the-loop for things that could be programmatic, manually verifying output, copy-pasting logs into chat
+**Signs I'm doing well:** Test framework set up before first feature, tooling established upfront (not retrofitted), Claude can run full verify loop without human intervention
+**Signs I'm slipping:** Adding tests one-off per bug without framework, manually verifying output, no test infrastructure until 3+ features are built, copy-pasting logs into chat
 
 ---
 
 ## Context & Session Management
 
-### Minimize Compaction
-- Prefer shorter, focused sessions over marathon sessions that hit context limits
-- Use targeted file reads instead of dumping entire files
-- Be intentional about what context is loaded
-- Exit and restart sessions when context is getting heavy rather than compacting
-- **Assess scope BEFORE starting** — if a task looks large, split into sessions upfront
+### Scope Before You Start
+- **First action in any session: assess scope** — before writing any code
+- If scope is too large, split into sessions. Do this BEFORE starting, not after hitting context limits
+- The failure mode is never "I scoped correctly but let context bloat" — it's always "I skipped the scope check"
+- Each session should produce one independently committable unit
 
 **Scope triggers** (any of these → plan session boundaries first):
 - Issue touches >2 subsystems (e.g., backend + client + hosting)
@@ -67,10 +58,25 @@ Personal practices I'm actively working to improve. Used by `/practice-review` f
 - Expected output is >10 files or >5 commits
 - Multiple languages/runtimes involved (e.g., TypeScript + Swift + HTML)
 
-**Splitting strategy**: Each session should produce an independently committable unit. Prefer vertical slices (infrastructure → integration → testing → cleanup) over horizontal ones.
+**Splitting strategy**: Prefer vertical slices (infrastructure → integration → testing → cleanup) over horizontal ones.
 
-**Signs I'm doing well:** Sessions end naturally, scope assessed upfront, proactive splitting, <10 files per session
-**Signs I'm slipping:** Hitting context warnings, 10+ files in a session, "just one more thing" scope creep, no scope check at start
+**Signs I'm doing well:** Scope assessed as first action, sessions end naturally, proactive splitting, <10 files per session
+**Signs I'm slipping:** Diving into code before scoping, "just one more thing" scope creep, 10+ files in a session, no scope check at session start
+
+---
+
+## Graduated (Probationary)
+
+Practices that are now habits. Still tracked in reviews, but only mentioned if they regress below 7/10. If a graduated practice drops below 7 in two consecutive sessions, it moves back to active.
+
+### Steer, Don't Row
+- Spend time on requirements and direction, not implementation details
+- Focus on injecting taste and wisdom — highest-leverage use of my time
+- Let Claude handle mechanical work; focus on "what" and "why"
+- My value-add is judgment, priorities, and quality standards
+
+**Graduated:** 2026-02-10 (8.4 avg over 8 sessions, 7/8 at 8+)
+**Regression threshold:** <7 in 2 consecutive sessions → re-activate
 
 ---
 

@@ -208,3 +208,99 @@ Session-by-session reflections on adherence to practices defined in `practices.m
 
 ---
 
+## 2026-02-10 | project: exocortex | overall: 7.8/10
+
+**Session:** Create CRM pages for Griffin Black associates (#211) — 3 people pages + 15 backlink edits
+
+### Steer, Don't Row
+- **Rating:** 9/10
+- **Evidence:** Fully-specified plan with exact file/line references for every edit. Zero implementation management — just requirements and verification criteria.
+- **Note:** Textbook delegation of a mechanical task.
+
+### Conversational over Waterfall
+- **Rating:** 7/10
+- **Evidence:** Plan built in prior planning session with iterative discovery. Execution session was appropriately direct — spec was complete and correct.
+- **Note:** Right call — for well-scoped mechanical tasks, pure execution is fine.
+
+### Co-Design in Plan Mode
+- **Rating:** 7/10
+- **Evidence:** Plan mode used in prior session to co-design approach. This session executed that plan.
+- **Note:** Good pattern: co-design in plan mode, then hand off for execution.
+
+### Build Autonomous Loops
+- **Rating:** 6/10
+- **Evidence:** Verification via git grep with expected hit counts. Review-debate ran. Vault content inherently hard to test programmatically.
+- **Note:** Grep verification criteria baked into the plan was a good lightweight automation pattern.
+
+### Minimize Compaction
+- **Rating:** 10/10
+- **Evidence:** 10 files changed, one commit, no context pressure. Clean arc from plan to PR.
+- **Note:** Well-scoped from the start, no scope creep.
+
+**Highlight:** Perfect scoping — plan-specified mechanical task executed in one clean pass with no wasted context.
+**Focus:** The grep-based verification criteria pattern is worth replicating for future vault editing tasks.
+
+---
+
+## 2026-02-10 | project: exocortex | overall: 7.6/10
+
+**Session:** `exo project new` CLI subcommand — implementation, backlink migration, PR, GitHub issue for backlinking tool
+
+### Steer, Don't Row
+- **Rating:** 8/10
+- **Evidence:** Plan provided upfront, execution delegated. Good mid-session corrections: backfill existing projects, fix "2025" in filename, catch missing history reconstruction step. Minor dock: insurance file content pasted from dry-run rather than created via CLI.
+- **Note:** Mid-session corrections were high-quality steering that improved the PR.
+
+### Conversational over Waterfall
+- **Rating:** 8/10
+- **Evidence:** Plan from prior co-design session. Iterative corrections during execution — backfill request, filename fix, reconstruct step check, skill edit. Timely course corrections, not big reveals.
+- **Note:** Good pattern of watching work happen and steering in real-time.
+
+### Co-Design in Plan Mode
+- **Rating:** 7/10
+- **Evidence:** Plan built in prior session. Execution session appropriately skipped plan mode. Filed GitHub issue #214 for backlinking tool instead of over-engineering inline.
+- **Note:** Filing an issue instead of building the backlinking tool was good scope discipline.
+
+### Build Autonomous Loops
+- **Rating:** 7/10
+- **Evidence:** 27 tests written and passing. Review-debate subagent caught empty-name validation bug — a real issue that got fixed before merge.
+- **Note:** Self-review catching a real edge case is the autonomous loop working as designed.
+
+### Minimize Compaction
+- **Rating:** 8/10
+- **Evidence:** 19 files but logically coherent (one feature + one migration). No context warnings or compaction. Clean session arc. Backfill added ~14 files but was the same conceptual change.
+- **Note:** Borderline scope but right call — backfill belongs with the feature that establishes the convention.
+
+**Highlight:** Catching missing history reconstruction step and immediately improving the skill. Meta-steering — improving the process while using it.
+**Focus:** Dog-food new tools end-to-end rather than working around them (insurance file was pasted, not CLI-created).
+
+---
+
+## 2026-02-10 | practices audit (audit)
+
+**Reviews analyzed:** 8 (2026-01-23 through 2026-02-10)
+
+### Statistics
+
+| Practice | Avg | Last 5 Avg | Variance | Signal |
+|----------|-----|------------|----------|--------|
+| Steer, Don't Row | 8.4 | 8.6 | Low (outlier: mega-session) | Graduated (probationary) |
+| Conversational/Waterfall | 7.3 | 7.0 | Medium | Healthy — no change |
+| Minimize Compaction | 7.0 | 7.8 | Enormous (1–10) | Sharpened |
+| Build Autonomous Loops | 6.5 | 6.6 | Very low | Sharpened |
+| Co-Design in Plan Mode | 6.0 | 6.2 | High (2–9) | Keep — still needs work |
+
+### Changes Made
+- **Graduated (probationary):** "Steer, Don't Row" — 8.4 avg, 7/8 sessions at 8+. Still tracked, only surfaces if <7.
+- **Sharpened:** "Minimize Compaction" → "Scope Before You Start" — the failure is always skipping scope assessment, never in-session management. Reframed around the actual failure mode.
+- **Sharpened:** "Build Autonomous Loops" — added infrastructure-first criteria. The one 8/10 was when test framework was built upfront; the 5-7 scores were piecemeal additions.
+- **No change:** "Conversational over Waterfall" — healthy 7.3 avg, no action needed.
+- **No change:** "Co-Design in Plan Mode" — 6.0 avg, still the weakest practice. Needs continued focus.
+
+### Skill Updates
+- Added Phase 7 (Periodic Practices Audit) to self-trigger after every 8 reviews
+- Added probationary graduation model (quiet unless regression)
+- Updated graduation threshold to 8+ over 5+ sessions
+
+---
+
