@@ -206,11 +206,11 @@ Apply changes? I can update files directly or show diffs first.
 ### Example 1: Workflow Auto-Continue
 
 **Evidence:** User said "push" to continue after commit
-**Root cause:** git-workflow requires explicit prompts between phases
+**Root cause:** /work requires explicit prompts between phases
 **Proposal:** Add to global CLAUDE.md:
 ```markdown
 ## Workflow Preferences
-- **auto-git-workflow**: When on a feature branch, complete the full git-workflow (commit → review → push → PR) without pausing for explicit prompts at each phase.
+- **auto-work**: When on a feature branch, complete the full /work (commit → review → push → PR) without pausing for explicit prompts at each phase.
 ```
 **Target:** `~/.claude/CLAUDE.md`
 **Validation:** Would have eliminated 3 single-word nudges

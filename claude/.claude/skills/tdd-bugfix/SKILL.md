@@ -385,7 +385,7 @@ The ONLY valid reasons to skip tests are listed in "When NOT to Use TDD" above.
 ## Integration with Other Skills
 
 - **After fixing**: Use design-iterate skill if UI bug
-- **Before merging**: Use git-workflow skill to create PR
+- **Before merging**: Use /work skill to create PR
 - **Code review feedback**: Use fix-pr-feedback skill
 
 ## Success Metrics
