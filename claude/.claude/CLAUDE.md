@@ -2,12 +2,12 @@
 
 ## Workflow Preferences
 
-- **auto-git-workflow**: Always use the `/git-workflow` skill (not manual git commands) for feature branch work. Follow the skill step-by-step—every phase is mandatory. Complete phases without pausing for explicit user prompts.
+- **auto-work**: Always use the `/work` skill (not manual git commands) for feature branch work. Follow the skill step-by-step—every phase is mandatory. Complete phases without pausing for explicit user prompts.
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
-- **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in git-workflow Phase 3.5). Set `skip-history-reconstruction: true` to disable.
+- **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in `/work` Phase 3.5). Set `skip-history-reconstruction: true` to disable.
 - **test-commit-style: together** — Keep tests with their implementation in the same commit during history reconstruction. Alternative: `separate` to put tests in their own commit.
-- **skip-github-issues**: Set `skip-github-issues: true` in a project's CLAUDE.md to skip the GitHub issue prompt during `/git-workflow`. Branches use `{slug}` format, commits omit `#{N}:` prefix, PRs omit `Closes #{N}`. An explicit issue number (e.g., `/git-workflow 42`) always overrides this flag.
+- **skip-github-issues**: Set `skip-github-issues: true` in a project's CLAUDE.md to skip the GitHub issue prompt during `/work`. Branches use `{slug}` format, commits omit `#{N}:` prefix, PRs omit `Closes #{N}`. An explicit issue number (e.g., `/work 42`) always overrides this flag.
 
 ## Subagent Context Management
 
@@ -167,7 +167,7 @@ For research-driven or complex features, chain skills in this order:
 1. `/enrich-plan` — Research approaches, interview for requirements
 2. `/review-debate` — Stress-test the design with adversarial critique
 3. `/plan-to-issues` or `/roadmap-to-milestone-and-issues` — Break into implementable units
-4. `/git-workflow` — Implement each unit (invokes `/tdd-bugfix` for bugs, `/review-debate` before push)
+4. `/work` — Implement each unit (invokes `/tdd-bugfix` for bugs, `/review-debate` before push)
 
 ## When Parallel Agents Help (and When They Hurt)
 

@@ -1,10 +1,10 @@
 ---
-name: git-workflow
-description: Complete feature branch workflow - creates feature branch, commits with proper formatting, creates PR. Works with or without GitHub issues. Use when implementing features, fixing bugs, or user says "/git-workflow". MANDATORY - never commit directly to main, always use feature branches and PRs.
+name: work
+description: Complete feature branch workflow - creates feature branch, commits with proper formatting, creates PR. Works with or without GitHub issues. Use when implementing features, fixing bugs, or user says "/work". MANDATORY - never commit directly to main, always use feature branches and PRs.
 allowed-tools: Bash(git:*), Bash(gh:*)
 ---
 
-# Git Workflow
+# Work
 
 Complete workflow for implementing features — works with or without GitHub Issues.
 
@@ -21,7 +21,7 @@ Invoke this skill immediately when the user indicates they want you to:
 - Implement a feature or fix without a GitHub issue
 - Start any feature branch work
 
-**Action: Invoke `/git-workflow` (with or without issue number) as your FIRST response**
+**Action: Invoke `/work` (with or without issue number) as your FIRST response**
 
 Do NOT:
 
@@ -34,11 +34,11 @@ The skill handles the complete workflow from start to finish.
 
 **Explicit invocation**:
 
-- User says `/git-workflow 42` or `/git-workflow {issue-number}`
-- User says `/git-workflow` (no args — will prompt for issue or proceed without one)
-- User says `/git-workflow commit` (when on a feature branch)
-- User says `/git-workflow review` (self-review with subagent debate)
-- User says `/git-workflow push` (auto-runs review, then creates PR)
+- User says `/work 42` or `/work {issue-number}`
+- User says `/work` (no args — will prompt for issue or proceed without one)
+- User says `/work commit` (when on a feature branch)
+- User says `/work review` (self-review with subagent debate)
+- User says `/work push` (auto-runs review, then creates PR)
 
 ## Mandatory Rules
 
@@ -53,16 +53,16 @@ The skill handles the complete workflow from start to finish.
 
 The complete workflow has six phases:
 
-1. **Start**: `/git-workflow [issue-number]` - Create feature branch
-2. **Commit**: `/git-workflow commit` - Stage and commit changes
-3. **Review**: `/git-workflow review` - Self-review with subagent debate (MANDATORY)
+1. **Start**: `/work [issue-number]` - Create feature branch (enters plan mode for non-trivial tasks)
+2. **Commit**: `/work commit` - Stage and commit changes
+3. **Review**: `/work review` - Self-review with subagent debate (MANDATORY)
 3.5. **Reconstruct**: (automatic) - Clean up commit history before push
-4. **Push**: `/git-workflow push` - Push branch and create PR
+4. **Push**: `/work push` - Push branch and create PR
 5. **Feedback**: `/fix-pr-feedback` - Address reviewer feedback and iterate
 
 ## Phase 1: Start Working
 
-**When**: User invokes `/git-workflow` (with or without an issue number)
+**When**: User invokes `/work` (with or without an issue number)
 
 **Steps**:
 
@@ -88,7 +88,7 @@ The complete workflow has six phases:
 4. **Resolve issue context** (determines `has_issue` for all subsequent phases):
 
    Resolution order:
-   1. **Explicit issue number provided** (e.g., `/git-workflow 42`): set `has_issue = true`, `issue_num = 42`. This ALWAYS takes precedence, even if `skip-github-issues: true` is set in CLAUDE.md.
+   1. **Explicit issue number provided** (e.g., `/work 42`): set `has_issue = true`, `issue_num = 42`. This ALWAYS takes precedence, even if `skip-github-issues: true` is set in CLAUDE.md.
    2. **CLAUDE.md contains `skip-github-issues: true`** and no explicit number: set `has_issue = false`. Prompt the user for a short description of the work (1-2 sentences).
    3. **No number provided and no opt-out flag**: Ask the user: "Do you have a GitHub issue for this work? (enter number/URL, or 'no')"
       - If user provides a number/URL: extract issue number, set `has_issue = true`
@@ -127,6 +127,27 @@ The complete workflow has six phases:
      - If user chooses all-at-once: proceed, but note the scope for practice review
    - **If no triggers fire**: proceed silently (don't slow down small issues)
 
+6.5. **Co-design check** (plan mode by default, skip for trivial tasks):
+
+   **Enter plan mode** (call `EnterPlanMode`) if ANY of these apply:
+   - Any scope trigger fired in step 6
+   - Issue involves a new feature (not a simple fix/chore)
+   - Issue body mentions architecture, design decisions, or multiple approaches
+   - User description (when no issue) suggests non-trivial work
+   - Working without an issue and description is more than one sentence
+
+   **Skip plan mode** ONLY if ALL of these apply:
+   - Single-file or few-file change
+   - Clear, specific task (bug fix with obvious solution, typo, config change)
+   - No architectural decisions involved
+   - User explicitly says "just do it" or equivalent
+
+   **Mechanics:**
+   - Call `EnterPlanMode` tool — user gets a prompt to accept/decline
+   - If user accepts: explore the codebase, design the approach, present a plan for approval via `ExitPlanMode`
+   - If user declines: proceed without plan mode (continue to step 7)
+   - This ensures the user co-designs the approach BEFORE any code is written, but AFTER the issue context is known
+
 7. **Create feature branch**:
    - Generate slug from description:
      - Convert to lowercase
@@ -144,14 +165,14 @@ The complete workflow has six phases:
      ```
      Next steps:
        1. Make your changes
-       2. Run: /git-workflow commit
-       3. Run: /git-workflow review
-       4. Run: /git-workflow push
+       2. Run: /work commit
+       3. Run: /work review
+       4. Run: /work push
      ```
 
 ## Phase 2: Commit Changes
 
-**When**: User says `/git-workflow commit` (must be on a feature branch)
+**When**: User says `/work commit` (must be on a feature branch)
 
 **Steps**:
 
@@ -200,7 +221,7 @@ The complete workflow has six phases:
 8. **Confirm success**:
    - Display: "✓ Committed: {commit_msg}"
    - Show latest commit: `git log -1 --oneline`
-   - Display: "Next step: /git-workflow review"
+   - Display: "Next step: /work review"
 
 ## Phase 3: Self-Review
 
@@ -233,11 +254,11 @@ The complete workflow has six phases:
 
 3. **Confirm completion**:
    - Display: "✓ Self-review complete"
-   - Display: "Ready for: /git-workflow push (will auto-reconstruct history if needed)"
+   - Display: "Ready for: /work push (will auto-reconstruct history if needed)"
 
 ## Phase 3.5: Reconstruct History
 
-**When**: Automatically triggered as part of `/git-workflow push` before pushing. Can also be invoked directly with `/git-workflow reconstruct`.
+**When**: Automatically triggered as part of `/work push` before pushing. Can also be invoked directly with `/work reconstruct`.
 
 **Purpose**: Transform messy development history (try A, fix typo, try B, WIP) into clean, semantic commits optimized for code reviewers.
 
@@ -360,7 +381,7 @@ The complete workflow has six phases:
 
 ## Phase 4: Push and Create PR
 
-**When**: User says `/git-workflow push` (must be on a feature branch with commits)
+**When**: User says `/work push` (must be on a feature branch with commits)
 
 **Steps**:
 
@@ -498,6 +519,6 @@ Add any of these to a project's CLAUDE.md to customize behavior:
 |---|---|
 | `skip-session-transcripts: true` | Skip `/export-session --gist` on initial commit |
 | `skip-history-reconstruction: true` | Skip Phase 3.5 history cleanup before push |
-| `skip-github-issues: true` | Skip issue prompt; use description-only branches. Explicit `/git-workflow 42` still overrides. |
+| `skip-github-issues: true` | Skip issue prompt; use description-only branches. Explicit `/work 42` still overrides. |
 | `test-commit-style: together` | (default) Keep tests with implementation in reconstruction |
 | `test-commit-style: separate` | Put tests in their own commit during reconstruction |

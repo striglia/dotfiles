@@ -10,7 +10,7 @@ Structured adversarial review using parallel subagents with opposing perspective
 
 ## When to Use
 
-- Before pushing code (auto-invoked by `/git-workflow push`)
+- Before pushing code (auto-invoked by `/work push`)
 - Before finalizing a significant plan or design
 - When you want a thorough self-review of any artifact
 - Explicit: `/review-debate` or `/review-debate {context}`

@@ -1,6 +1,6 @@
 ---
 name: codex-review
-description: Code review using OpenAI Codex in headless mode. Alternative to review-debate for external perspective. Use manually or as part of git-workflow.
+description: Code review using OpenAI Codex in headless mode. Alternative to review-debate for external perspective. Use manually or as part of /work.
 allowed-tools: Bash(git:*), Bash(gh:*), Bash(codex:*), Read, Grep, Glob
 ---
 
@@ -11,7 +11,7 @@ External code review using OpenAI's Codex CLI in headless mode. Provides a fresh
 ## When to Use
 
 - Manual: `/codex-review` - Review current branch changes
-- Automatic: Invoked by `/git-workflow review` when configured
+- Automatic: Invoked by `/work review` when configured
 - When you want a second opinion from a different model
 - When review-debate feels like too much ceremony for medium-sized changes
 
@@ -227,11 +227,11 @@ Output this format:
 
 ---
 
-## Integration with git-workflow
+## Integration with /work
 
-This skill can be invoked by `/git-workflow review` as an alternative to `/review-debate`.
+This skill can be invoked by `/work review` as an alternative to `/review-debate`.
 
-**To enable codex-review in git-workflow**, add to CLAUDE.md:
+**To enable codex-review in `/work`**, add to CLAUDE.md:
 
 ```markdown
 review-method: codex-review

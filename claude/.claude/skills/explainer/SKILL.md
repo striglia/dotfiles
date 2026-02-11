@@ -12,7 +12,7 @@ Generate a self-contained HTML document that tells the story of a branch for cod
 
 - `/explainer` - Generate explainer for the current branch
 - Before or after PR creation (auto-detects)
-- As part of the `/git-workflow` chain (before push)
+- As part of the `/work` chain (before push)
 - When you want to give reviewers rich context beyond a PR description
 
 ## Philosophy
@@ -259,7 +259,7 @@ Display: "Explainer linked in PR description."
 Save the gist URL for later use:
 
 ```bash
-# Save the viewable URL for git-workflow to pick up (this is the link that goes in the PR)
+# Save the viewable URL for /work to pick up (this is the link that goes in the PR)
 echo "${VIEWABLE_URL}" > /tmp/explainer-gist-url-${SHA}
 ```
 
@@ -269,15 +269,15 @@ Viewable: [viewable URL]
 Gist: [gist URL]
 
 No PR found yet. Viewable URL saved — will be included when PR is created.
-(Saved to /tmp/explainer-gist-url-${SHA} for /git-workflow to pick up)
+(Saved to /tmp/explainer-gist-url-${SHA} for /work to pick up)
 ```
 
-## Integration with /git-workflow
+## Integration with /work
 
-The `/git-workflow` Phase 4 (Push and Create PR) should check for a saved explainer URL:
+The `/work` Phase 4 (Push and Create PR) should check for a saved explainer URL:
 
 ```bash
-# In git-workflow Phase 4, before creating PR:
+# In /work Phase 4, before creating PR:
 if [ -f /tmp/explainer-gist-url-${SHA} ]; then
   EXPLAINER_URL=$(head -1 /tmp/explainer-gist-url-${SHA})
   # Include in PR body
