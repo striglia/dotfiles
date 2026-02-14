@@ -40,7 +40,7 @@ Session Metrics:
 
 These metrics enable tracking improvement over time.
 
-**Inline capture dedup:** The `capture-knowledge` rule in global CLAUDE.md persists corrections inline during the session. Before proposing a change in Phase 4, check whether it was already written to CLAUDE.md earlier in this session. If so, skip it and note "(already captured inline)" in the output.
+**Inline capture dedup:** The `capture-knowledge` rule in global CLAUDE.md persists corrections inline during the session. In Phase 4, delegate dedup checking to a Sonnet subagent (via Task tool with `model=sonnet`). Pass proposed changes in the task prompt. The subagent reads project CLAUDE.md and `~/.claude/CLAUDE.md`, compares against proposals, and returns only those not already covered by existing rules. Note which proposals were "(already captured inline)" in the output. This keeps dedup work out of the main retro context.
 
 ### Phase 2: Scan for Both Problems AND Successes
 
