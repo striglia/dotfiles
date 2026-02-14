@@ -40,6 +40,8 @@ Session Metrics:
 
 These metrics enable tracking improvement over time.
 
+**Inline capture dedup:** The `capture-knowledge` rule in global CLAUDE.md persists corrections inline during the session. Before proposing a change in Phase 4, check whether it was already written to CLAUDE.md earlier in this session. If so, skip it and note "(already captured inline)" in the output.
+
 ### Phase 2: Scan for Both Problems AND Successes
 
 **PROBLEMS to fix:**
