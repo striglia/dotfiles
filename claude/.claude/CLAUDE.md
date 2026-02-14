@@ -4,6 +4,7 @@
 
 - **auto-work**: Always use the `/work` skill (not manual git commands) for feature branch work. Follow the skill step-by-step—every phase is mandatory. Complete phases without pausing for explicit user prompts.
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
+- **capture-knowledge**: When a user corrects you or teaches a convention ("don't do X, use Y", "we always...", "the convention here is...", "I prefer..."), immediately offer to persist it. One-liner format: `Worth saving? I can add to [target]: "[proposed rule]"`. User says yes, edits, or dismisses. See `/capture-knowledge` skill for full details. Don't offer for situational corrections ("no, I meant this file") or rules already documented.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
 - **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in `/work` Phase 3.5). Set `skip-history-reconstruction: true` to disable.
 - **test-commit-style: together** — Keep tests with their implementation in the same commit during history reconstruction. Alternative: `separate` to put tests in their own commit.
