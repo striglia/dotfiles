@@ -97,12 +97,26 @@ After presenting the workout:
 
 When the user returns with workout results (they'll say something like "done", "finished", or provide weights/reps):
 
-1. **Log to training log**: Append a new entry to `vault/fitness/training_log.md` with:
+1. **Log to training log**: Append a new entry to `vault/fitness/training_log.md`. Log **ALL** workouts — Nippard program days, Peloton classes, personal trainer sessions, volleyball, anything that counts as exercise.
+
+   For Nippard program sessions (include weights/reps for progression):
    ```markdown
    ## YYYY-MM-DD — Block X, Week Y, Day Z (Full Body/Upper/Lower)
    | Exercise | Warm-up | Working Sets | Notes |
    |----------|---------|-------------|-------|
    | [Exercise] | [warm-up details] | [sets x reps @ weight RPE X] | [user notes] |
+   ```
+
+   For Peloton / other sessions:
+   ```markdown
+   ## YYYY-MM-DD — Peloton [Type] (duration)
+   | Detail | Value |
+   |--------|-------|
+   | Class | [class name] |
+   | Instructor | [name] |
+   | Type | [Cycling / Strength / Pilates / etc.] |
+   | Duration | [X min] |
+   | Notes | [optional user notes] |
    ```
 
 2. **Add journal summary**: Append to today's journal a brief workout entry:
@@ -120,8 +134,9 @@ When the user returns with workout results (they'll say something like "done", "
 
 ## Important Notes
 
+- **Log ALL fitness** — the training log tracks every workout, not just Nippard days. Peloton rides, pilates, trainer sessions, volleyball — if it's exercise, it goes in the log. Use `uv run exo peloton-sync --max 5 --no-samples` to pull recent Peloton data when needed.
 - **Program data lives in the vault** — always read `nippard_essentials_program.md` fresh, don't rely on cached knowledge. The user may update exercises or swap programs.
-- **Week tracking is journal-based** — scan training log entries to determine where in the program the user is. Don't assume.
+- **Week tracking uses the training log** — scan training log entries to determine where in the program the user is and how many sessions they've done this week. Don't assume.
 - **Don't overwhelm** — the morning briefing already shows Oura + exercise lead measures. Arnie is the on-demand coach, not another dashboard.
 - **Personal trainer sessions count** — if the user mentions a personal trainer session, count it toward weekly volume but don't log specific exercises (the trainer handles programming for those sessions).
 - **Equipment availability** — if the user mentions they're at a specific gym or have limited equipment, suggest substitutions from the program reference.
