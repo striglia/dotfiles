@@ -97,7 +97,7 @@ After presenting the workout:
 
 When the user returns with workout results (they'll say something like "done", "finished", or provide weights/reps):
 
-1. **Log to training log**: Append a new entry to `vault/fitness/training_log.md`. Log **ALL** workouts — Nippard program days, Peloton classes, personal trainer sessions, volleyball, anything that counts as exercise.
+1. **Log to training log**: **Prepend** a new entry to `vault/fitness/training_log.md` (newest first — reverse chronological). Insert right after the `<!-- Prepend new entries below this line -->` comment. Log **ALL** workouts — Nippard program days, Peloton classes, personal trainer sessions, volleyball, anything that counts as exercise.
 
    For Nippard program sessions (include weights/reps for progression):
    ```markdown
