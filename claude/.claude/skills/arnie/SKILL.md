@@ -44,6 +44,22 @@ Read all of the following to understand the current state. Do these reads in par
      | python3 -c "import sys,json; d=json.load(sys.stdin)['data']; print(f'Readiness: {d[0][\"score\"]}') if d else print('No Oura data synced yet')"
    ```
    If this fails or returns no data, note it and proceed without — don't let missing data block the recommendation.
+6. **Peloton stats** (optional, for richer context): If the Peloton DB exists, pull computed stats:
+   ```bash
+   uv run python3 -c "
+   from app.db.peloton import get_peloton_db
+   from datetime import datetime, timedelta
+   db = get_peloton_db()
+   # This week's sessions
+   week_start = datetime.now().strftime('%Y-%m-%d')
+   stats = db.get_stats()
+   if stats:
+       print(f'Total workouts: {stats[\"total_workouts\"]}')
+       print(f'This week: {stats[\"workouts_this_week\"]}')
+       print(f'Current streak: {stats[\"current_streak\"]} days')
+   "
+   ```
+   If the DB doesn't exist or this fails, skip — it's supplemental context, not required.
 
 ## Phase 2: Recommend Today's Workout
 
@@ -107,7 +123,7 @@ When the user returns with workout results (they'll say something like "done", "
    | [Exercise] | [warm-up details] | [sets x reps @ weight RPE X] | [user notes] |
    ```
 
-   For Peloton / other sessions:
+   For Peloton / other sessions (include metrics when available from `exo peloton-sync`):
    ```markdown
    ## YYYY-MM-DD — Peloton [Type] (duration)
    | Detail | Value |
@@ -116,8 +132,13 @@ When the user returns with workout results (they'll say something like "done", "
    | Instructor | [name] |
    | Type | [Cycling / Strength / Pilates / etc.] |
    | Duration | [X min] |
+   | Output | [X kJ] |
+   | Calories | [X kcal] |
+   | Avg HR | [X bpm] |
+   | Strive Score | [X] |
    | Notes | [optional user notes] |
    ```
+   Only include metric rows (Output, Calories, Avg HR, Strive Score) if the data is available — omit rows with no data rather than showing "N/A".
 
 2. **Add journal summary**: Append to today's journal a brief workout entry:
    ```markdown
@@ -134,7 +155,7 @@ When the user returns with workout results (they'll say something like "done", "
 
 ## Important Notes
 
-- **Log ALL fitness** — the training log tracks every workout, not just Nippard days. Peloton rides, pilates, trainer sessions, volleyball — if it's exercise, it goes in the log. Use `uv run exo peloton-sync --max 5 --no-samples` to pull recent Peloton data when needed.
+- **Log ALL fitness** — the training log tracks every workout, not just Nippard days. Peloton rides, pilates, trainer sessions, volleyball — if it's exercise, it goes in the log. Use `uv run exo peloton-sync --max 5 --no-samples` to pull recent Peloton data when needed. Include metrics (output, calories, avg HR, strive score) whenever available from the Peloton DB.
 - **Program data lives in the vault** — always read `nippard_essentials_program.md` fresh, don't rely on cached knowledge. The user may update exercises or swap programs.
 - **Week tracking uses the training log** — scan training log entries to determine where in the program the user is and how many sessions they've done this week. Don't assume.
 - **Don't overwhelm** — the morning briefing already shows Oura + exercise lead measures. Arnie is the on-demand coach, not another dashboard.

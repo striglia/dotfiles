@@ -304,3 +304,69 @@ Session-by-session reflections on adherence to practices defined in `practices.m
 
 ---
 
+## 2026-02-10 | project: dotfiles | overall: 7.0/10
+
+**Session:** Practice review system audit — analyzed 8 sessions of history, graduated "Steer, Don't Row" (probationary), sharpened two practices, added self-triggering Phase 7 audit to the skill.
+
+### Conversational over Waterfall
+- **Rating:** 8/10
+- **Evidence:** Presented analysis first, asked 3 targeted questions, built implementation from user's "probationary graduated" concept.
+- **Note:** Good: analysis → decisions → implementation. Could show draft edits before committing.
+
+### Co-Design in Plan Mode
+- **Rating:** 5/10
+- **Evidence:** No plan mode. Changes to how the review system works are exactly the kind of architectural decision plan mode exists for.
+- **Note:** Meta-irony: session improving the practice system skipped the weakest practice.
+
+### Build Autonomous Loops
+- **Rating:** 6/10
+- **Evidence:** Review-debate launched (1/3 subagents completed — reasonable for all-markdown). No tests (documentation/process). No novel automation.
+- **Note:** A dry-run skill invocation could verify Phase 7 trigger logic.
+
+### Scope Before You Start
+- **Rating:** 9/10
+- **Evidence:** 4 files, one PR, one logical unit. Clean arc, no scope creep.
+- **Note:** Inherently well-scoped; discipline held.
+
+### Steer, Don't Row (graduated — holding steady)
+- **Rating:** 8/10 (internal)
+- **Note:** No regression.
+
+**Highlight:** AskUserQuestion with 3 targeted questions was effective lightweight co-design — data into decisions efficiently.
+**Focus:** Co-Design remains persistent weak spot (5.6 avg). For sessions changing process/tooling behavior, start in plan mode even when scope seems small.
+
+---
+
+## 2026-02-11 | project: exocortex | overall: 7.5/10
+
+**Session:** Agentic Architecture — AgentConfig registry with trust model (PR #218), coverage analysis, tracking issue #219
+
+### Conversational over Waterfall
+- **Rating:** 7/10
+- **Evidence:** Plan from prior session executed autonomously. User injected coverage analysis request mid-implementation. Asked scope question at the right moment. Redirected to issue creation instead of expanding scope.
+- **Note:** Appropriate for execution-heavy session.
+
+### Co-Design in Plan Mode
+- **Rating:** 7/10
+- **Evidence:** Plan mode used in prior session to co-design the architecture. This session was pure execution. Appropriate to skip.
+- **Note:** Two-session pattern (co-design → execute) working well.
+
+### Build Autonomous Loops
+- **Rating:** 8/10
+- **Evidence:** 20 new tests covering trust enforcement edge cases. All 1000 tests passing. Review-debate with 3 parallel subagents. Ruff formatting verified.
+- **Note:** Trust enforcement tests are infrastructure that pays forward.
+
+### Scope Before You Start
+- **Rating:** 8/10
+- **Evidence:** 12 files, +1109/-240 lines — borderline but coherent. User asked "should we do other tools in this branch?" and accepted separate-branch recommendation. Created tracking issue #219 instead of expanding scope.
+- **Note:** "Create issue instead of expanding scope" is excellent discipline.
+
+### Steer, Don't Row (graduated — holding steady)
+- **Rating:** 8/10 (internal)
+- **Note:** No regression.
+
+**Highlight:** Scope discipline — user asked the right question at the right moment, redirected to tracking issue instead of scope creep.
+**Focus:** Co-Design still at 6.6 avg. For follow-up work on #219, consider quick plan mode pass even for seemingly straightforward tool wiring.
+
+---
+
