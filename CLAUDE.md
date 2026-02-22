@@ -8,6 +8,7 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 |-----------|-------------|----------|
 | `claude/` | `~/.claude/` | Claude Code skills, agents, commands, settings |
 | `git/` | `~/.gitconfig` | Git global config |
+| `vault/` | `~/vault/` | Personal vault data (health labs, etc.) |
 | `zsh/` | `~/.zshrc`, `~/.zprofile`, `~/.zshenv` | Zsh shell config |
 
 ## Key Locations
@@ -16,6 +17,7 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 - **Agents**: `claude/.claude/agents/` - Specialized subagents (architecture-astronaut, code-simplifier, etc.)
 - **Commands**: `claude/.claude/commands/` - Slash commands
 - **Global CLAUDE.md**: `claude/.claude/CLAUDE.md` - Global instructions for all projects
+- **Lab results**: `vault/health/labs/` - Blood work and lab reports (chronological markdown files)
 
 skip-github-issues: true
 

@@ -6,6 +6,7 @@
 !git/
 !zsh/
 !claude/
+!vault/
 
 # Ignore tmp and swap files
 *~
