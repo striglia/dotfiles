@@ -1,20 +1,33 @@
 ---
 name: markdown-fetch
-description: Fetch a webpage's content as clean markdown using markdown.new, stripping away HTML/JS/CSS to focus on the actual content. Use when you need to read a webpage for its information, not its structure.
+description: Fetch a webpage's content as clean markdown using markdown.new. Use this as the DEFAULT approach for any web fetch where you need to read page content — articles, docs, blog posts, reference pages. Only use raw WebFetch when you specifically need HTML structure, DOM layout, JavaScript behavior, or CSS.
 allowed-tools: WebFetch, Bash(curl:*)
 ---
 
 # Markdown Fetch
 
-Fetch a webpage's content as clean, readable markdown via [markdown.new](https://markdown.new). Use this when you care about **what a page says**, not how it's built.
+**Default rule: if you're fetching a page to read its content, use markdown.new.** Only bypass this and use raw `WebFetch` if you need the HTML/DOM/JS itself.
+
+Fetch a webpage's content as clean, readable markdown via [markdown.new](https://markdown.new). The service strips nav, ads, boilerplate, and markup — returning only the actual content.
+
+## Content vs. Structure — Pick One
+
+| You need... | Use... |
+|---|---|
+| What the page says (article, docs, blog post, reference) | **markdown.new** (this skill) |
+| The HTML structure, DOM tree, or CSS | `WebFetch` directly |
+| JavaScript behavior or rendered DOM | `WebFetch` directly |
+| A page's raw source | `WebFetch` directly |
+
+When in doubt: if you'd summarize it or quote from it, use markdown.new.
 
 ## When to Use
 
-- When the user asks you to read, summarize, or reference a webpage's content
-- When `WebFetch` fails on a URL (403, bot-blocking, Cloudflare challenges) — markdown.new acts as an intermediary that can often bypass these restrictions
-- When the user says "fetch this page", "what does this page say", "summarize this article", etc.
-- When you need clean text from a page cluttered with nav, ads, and boilerplate HTML
-- Do **not** use this when the user cares about the actual HTML structure, DOM, JavaScript behavior, or CSS — use `WebFetch` directly for those cases
+- Reading any article, documentation page, blog post, or reference material
+- Summarizing or quoting from a webpage
+- When the user says "fetch this page", "what does this page say", "read this URL", etc.
+- When `WebFetch` fails (403, bot-blocking, JS-gated content) — markdown.new uses a real browser and often succeeds where raw fetch fails
+- Any time you just need the words on the page, not the markup around them
 
 ## How markdown.new Works
 
