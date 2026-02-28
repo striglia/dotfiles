@@ -507,6 +507,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - `has_issue = false`: branch slug and description drive naming and commit messages
 - If already on a feature branch, detect issue number automatically (if present)
 - **Worktree detection**: `git rev-parse --git-dir` vs `--git-common-dir` — if they differ, you're in a worktree. Create branches from current branch (can't checkout `main`).
+- **Worktree path discipline**: When in a worktree, ALL file operations (Read, Edit, Write, Grep, Glob) MUST use the worktree's path as the base, not the main repo path. The worktree has its own complete copy of the repo. If you search from the main repo path and then edit those paths, your changes land in the wrong checkout. Always derive paths from the CWD, not from hardcoded or previously-seen repo paths.
 - **Transcripts**: initial commit only, via `/export-session --gist` (unless `skip-session-transcripts: true`)
 - **Self-review**: see `/review-debate` skill for Advocate/Critic subagent details
 - **History reconstruction**: always backup first, verify with `git diff`, roll back on mismatch. If branch is issue-linked, preserve the issue number reference in reconstructed commits.
