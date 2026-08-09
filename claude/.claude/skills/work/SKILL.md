@@ -47,7 +47,7 @@ The skill handles the complete workflow from start to finish.
 3. **ALWAYS use proper commit message format** (see Commit Message Format section)
 4. **ALWAYS create a Pull Request - never merge without PR**
 5. **ALWAYS include "Closes #{number}" in PR body** when working from an issue
-6. **Export session transcript** on initial commit only - run `/export-session --gist` and include URL in commit message (default: ON, opt-out via CLAUDE.md). Follow-up commits (via `/fix-pr-feedback` or manual) do not include transcripts.
+6. **Session transcripts are opt-in** - never upload a transcript or workspace history unless the user explicitly approves that specific external upload after being informed what it contains and where it will go. Without approval, omit the transcript and continue the commit, review, push, and PR workflow.
 
 ## Core Workflow
 
@@ -202,16 +202,12 @@ The complete workflow has six phases:
    - Re-stage if formatters made changes: `git add .`
    - This prevents CI failures from formatting issues that slipped through hooks
 
-6. **Generate transcript** (default: ON, initial commit only):
-   - Skip this step if this is a follow-up commit (branch already has commits ahead of main)
-   - Check if branch has prior commits: `git rev-list --count origin/main..HEAD`
-   - If count > 0, skip transcript generation - this is a follow-up commit
-   - If count == 0 (first commit on branch):
-     - Check if CLAUDE.md contains `skip-session-transcripts: true`
-     - If opt-out is set, skip this step
-     - Otherwise, run: `/export-session --gist` to upload session transcript
-     - Capture the gist URL from output
-     - This creates a permanent record of the initial development session
+6. **Generate transcript** (opt-in, initial commit only):
+   - Check if CLAUDE.md contains `skip-session-transcripts: true`; if so, skip this step.
+   - Check if the user explicitly approved this specific transcript upload in the current conversation. Do not infer approval from a general request to commit, push, or use `/work`.
+   - If approval is absent, skip transcript generation and continue the workflow without a transcript line.
+   - If approved, confirm this is the branch's first commit with `git rev-list --count origin/main..HEAD`; follow-up commits never include transcripts.
+   - Run `/export-session --gist`, capture the URL, and include it in the initial commit message.
 
 7. **Create commit**:
    - **With issue**: Fetch issue title: `gh issue view {issue_num} --json title -q .title`
@@ -484,7 +480,7 @@ Subject line: `#{issue-number}: {description}` (with issue) or `{description}` (
 ```
 [#{N}: ]{description}        ← #{N}: prefix only when has_issue
 
-Transcript: {gist-url}       ← initial commit only (unless skip-session-transcripts)
+Transcript: {gist-url}       ← initial commit only when explicitly approved
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -508,7 +504,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 - If already on a feature branch, detect issue number automatically (if present)
 - **Worktree detection**: `git rev-parse --git-dir` vs `--git-common-dir` — if they differ, you're in a worktree. Create branches from current branch (can't checkout `main`).
 - **Worktree path discipline**: When in a worktree, ALL file operations (Read, Edit, Write, Grep, Glob) MUST use the worktree's path as the base, not the main repo path. The worktree has its own complete copy of the repo. If you search from the main repo path and then edit those paths, your changes land in the wrong checkout. Always derive paths from the CWD, not from hardcoded or previously-seen repo paths.
-- **Transcripts**: initial commit only, via `/export-session --gist` (unless `skip-session-transcripts: true`)
+- **Transcripts**: opt-in and initial commit only. Never upload without explicit approval for that specific external upload; `skip-session-transcripts: true` is a hard project-level prohibition.
 - **Self-review**: see `/review-debate` skill for Advocate/Critic subagent details
 - **History reconstruction**: always backup first, verify with `git diff`, roll back on mismatch. If branch is issue-linked, preserve the issue number reference in reconstructed commits.
 
@@ -518,7 +514,7 @@ Add any of these to a project's CLAUDE.md to customize behavior:
 
 | Flag | Effect |
 |---|---|
-| `skip-session-transcripts: true` | Skip `/export-session --gist` on initial commit |
+| `skip-session-transcripts: true` | Prohibit transcript uploads for this project |
 | `skip-history-reconstruction: true` | Skip Phase 3.5 history cleanup before push |
 | `skip-github-issues: true` | Skip issue prompt; use description-only branches. Explicit `/work 42` still overrides. |
 | `test-commit-style: together` | (default) Keep tests with implementation in reconstruction |
