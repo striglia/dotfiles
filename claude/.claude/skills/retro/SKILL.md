@@ -217,16 +217,17 @@ Apply changes? I can update files directly or show diffs first.
 **Target:** `~/.claude/CLAUDE.md`
 **Validation:** Would have eliminated 3 single-word nudges
 
-### Example 2: Missing Skill Invocation
+### Example 2: Testing Preference
 
-**Evidence:** User manually ran tests, fixed errors, committed - workflow that /tdd-bugfix handles
-**Root cause:** Claude didn't recognize bug-fix pattern as skill trigger
+**Evidence:** User asked for tests that verify meaningful behavior
+**Root cause:** Tests repeated implementation details without checking useful outcomes
 **Proposal:** Add to skill description or CLAUDE.md:
 ```markdown
-## Proactive Skill Usage
-- When fixing bugs, proactively invoke `/tdd-bugfix` for regression-safe fixes
+## Testing
+- Use TDD.
+- Avoid low value tautological unit tests.
 ```
-**Target:** `~/.claude/CLAUDE.md` or enhance tdd-bugfix trigger docs
+**Target:** `~/.claude/CLAUDE.md` or the tdd-bugfix skill
 
 ### Example 3: Tool Preference
 

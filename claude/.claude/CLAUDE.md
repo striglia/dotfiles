@@ -6,8 +6,6 @@
 - **auto-cleanup-after-merge**: After merging a PR (whether user merges or Claude merges), automatically clean up local git: checkout main, pull, delete merged feature branches.
 - **capture-knowledge**: When a user corrects you or teaches a convention ("don't do X, use Y", "we always...", "the convention here is...", "I prefer..."), immediately offer to persist it. One-liner: `Worth saving? I can add to [target]: "[proposed rule]"`. User says yes, edits, or dismisses. Don't offer for situational corrections ("no, I meant this file") or rules already documented. Placement: project-specific conventions → `./CLAUDE.md`, cross-project preferences / tool choices → `~/.claude/CLAUDE.md`, skill-specific behavior → relevant skill file. When ambiguous, default to project CLAUDE.md. Always check the target file for duplicates before writing. After saving, continue the interrupted work immediately — the whole capture should be a two-second aside.
 - **practice-review-prompts**: At the end of substantive sessions (meaningful work, not quick questions), offer to run `/practice-review` if the session touched areas covered by `~/.claude/practices.md`. Phrase as: "This session touched [area]. Want to run `/practice-review` to reflect on how it went?"
-- **reconstruct-before-pr**: Always reconstruct history before pushing PR (automatic in `/work` Phase 3.5). Set `skip-history-reconstruction: true` to disable.
-- **test-commit-style: together** — Keep tests with their implementation in the same commit during history reconstruction. Alternative: `separate` to put tests in their own commit.
 - **skip-github-issues**: Set `skip-github-issues: true` in a project's CLAUDE.md to skip the GitHub issue prompt during `/work`. Branches use `{slug}` format, commits omit `#{N}:` prefix, PRs omit `Closes #{N}`. An explicit issue number (e.g., `/work 42`) always overrides this flag.
 
 ## Subagent Context Management
@@ -26,22 +24,10 @@ When creating new files that agents should consult (like `insights.md`, `ARCHITE
 - **Include the file in relevant sections**: Add a brief description of what the file contains and when to consult it.
 - **This is not optional**: Creating an agent-facing file without updating CLAUDE.md is like adding a tool without documenting it.
 
-## Bug Fix Workflow
+## Testing
 
-When implementing ANY bugfix—whether from:
-- A bug report ("X is not working", "X is broken")
-- A plan that fixes a bug
-- A PR review comment about a bug
-- A failing test investigation
-
-**ALWAYS:**
-1. Invoke `/tdd-bugfix` skill FIRST, before writing any fix code
-2. Write a failing test that reproduces the bug
-3. THEN implement the fix
-4. Never rationalize skipping tests because code is "hard to test"
-   - If testing requires infrastructure, BUILD the infrastructure
-   - That infrastructure has value for future development
-   - "Manual testing" is not acceptable for agentic workflows
+- Use TDD.
+- Avoid low value tautological unit tests.
 
 ## Development Conventions
 
@@ -168,7 +154,7 @@ For research-driven or complex features, chain skills in this order:
 1. `/enrich-plan` — Research approaches, interview for requirements
 2. `/review-debate` — Stress-test the design with adversarial critique
 3. `/plan-to-issues` or `/roadmap-to-milestone-and-issues` — Break into implementable units
-4. `/work` — Implement each unit (invokes `/tdd-bugfix` for bugs, `/review-debate` before push)
+4. `/work` — Implement each unit (invokes `/review-debate` before push)
 
 ## When Parallel Agents Help (and When They Hurt)
 
