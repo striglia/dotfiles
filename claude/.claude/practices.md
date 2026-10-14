@@ -1,6 +1,6 @@
 # My Development Practices
 
-Personal practices I'm actively working to improve. Used by `/practice-review` for end-of-session reflection.
+Personal practices I'm actively working to improve.
 
 ---
 
