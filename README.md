@@ -8,6 +8,8 @@ Dotfiles are organized into **stow packages** (directories):
 
 ```
 dotfiles/
+├── apple-release/   # Apple release checks
+│   └── .local/bin/  # Symlinked into ~/.local/bin/
 ├── claude/          # Claude Code configuration
 │   └── .claude/     # Symlinked to ~/.claude/
 ├── git/             # Git configuration
@@ -123,6 +125,29 @@ git push
 ```
 
 ## Package Descriptions
+
+### `apple-release/`
+
+Install the macOS preflight with `stow apple-release`. It runs with Python 3
+and uses the selected Xcode for the toolchain check. Use the same
+`DEVELOPER_DIR` as the archive command when selecting Xcode per release.
+
+Check [Apple’s SDK requirements](https://developer.apple.com/news/upcoming-requirements/)
+and [announced changes](https://developer.apple.com/app-store/submitting/) for the
+planned upload date. Set `required_sdk` to the enforced iOS SDK floor. Check the
+toolchain before archiving and then check the SDK recorded in the finished
+archive before uploading.
+
+```sh
+apple-release-preflight --minimum-sdk "$required_sdk"
+apple-release-preflight --minimum-sdk "$required_sdk" --archive "$archive"
+```
+
+Pass `--upcoming-sdk` and `--effective` together to flag an announced floor
+without failing a release that meets the enforced floor. Check Apple’s
+[Xcode host requirements](https://developer.apple.com/xcode/system-requirements/)
+when planning an upgrade. Preserve the upload log and report any Apple
+`ITMS-` or App Store Connect warnings alongside the final TestFlight status.
 
 ### `claude/`
 Claude Code configuration including:

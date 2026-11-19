@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Compare a selected Xcode or archived iPhone app against Apple's SDK floors."""
+
+import argparse
+import os
+import plistlib
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def version(value):
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){0,2}", value):
+        raise ValueError(f"Expected a numeric iOS SDK version, got {value!r}")
+    parts = tuple(map(int, value.split(".")))
+    return parts + (0,) * (3 - len(parts))
+
+
+def command(*args):
+    return subprocess.run(args, check=True, capture_output=True, text=True).stdout.strip()
+
+
+def toolchain_sdk():
+    print(f"macOS {command('sw_vers', '-productVersion')}")
+    if os.environ.get("DEVELOPER_DIR"):
+        print(f"DEVELOPER_DIR={os.environ['DEVELOPER_DIR']}")
+    print(command("xcodebuild", "-version"))
+    return command("xcrun", "--sdk", "iphoneos", "--show-sdk-version")
+
+
+def archive_sdk(archive):
+    with (archive / "Info.plist").open("rb") as file:
+        properties = plistlib.load(file)["ApplicationProperties"]
+    products = (archive / "Products").resolve()
+    app_info = (products / properties["ApplicationPath"] / "Info.plist").resolve()
+    app_info.relative_to(products)
+    with app_info.open("rb") as file:
+        sdk_name = plistlib.load(file)["DTSDKName"]
+    match = re.fullmatch(r"iphoneos([0-9]+(?:\.[0-9]+){0,2})", sdk_name)
+    if match is None:
+        raise ValueError(f"Expected an iPhoneOS SDK in the archive's DTSDKName, got {sdk_name!r}")
+    return match.group(1)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--minimum-sdk", required=True, help="Apple's enforced iOS SDK floor")
+    parser.add_argument("--upcoming-sdk", help="A future iOS SDK floor Apple has announced")
+    parser.add_argument("--effective", help="Apple's announced date for the upcoming floor")
+    parser.add_argument("--archive", type=Path, help="Inspect this .xcarchive instead of the selected Xcode")
+    args = parser.parse_args()
+    if bool(args.upcoming_sdk) != bool(args.effective):
+        parser.error("--upcoming-sdk and --effective must be supplied together")
+
+    try:
+        minimum = version(args.minimum_sdk)
+        upcoming = version(args.upcoming_sdk) if args.upcoming_sdk else None
+        sdk = archive_sdk(args.archive) if args.archive else toolchain_sdk()
+        sdk_version = version(sdk)
+    except subprocess.CalledProcessError as error:
+        print(f"error: {error.cmd[0]} failed: {error.stderr.strip() or error}", file=sys.stderr)
+        return 1
+    except (OSError, KeyError, TypeError, ValueError, plistlib.InvalidFileException) as error:
+        print(f"error: Could not check the iPhoneOS SDK: {error}", file=sys.stderr)
+        return 1
+
+    source = "Archive" if args.archive else "Selected Xcode"
+    print(f"{source} iPhoneOS SDK {sdk}", flush=True)
+    if sdk_version < minimum:
+        print(f"error: SDK {sdk} is below Apple's enforced iOS SDK floor {args.minimum_sdk}.", file=sys.stderr)
+        return 1
+    if upcoming is not None and sdk_version < upcoming:
+        print(f"warning: Apple announced iOS SDK {args.upcoming_sdk} starting {args.effective}. "
+              f"This release meets the current floor of {args.minimum_sdk}.", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
