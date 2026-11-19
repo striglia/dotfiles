@@ -6,6 +6,7 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 
 | Directory | Symlinks To | Contains |
 |-----------|-------------|----------|
+| `apple-release/` | `~/.local/bin/` | Apple release SDK preflight |
 | `claude/` | `~/.claude/` | Claude Code skills, agents, commands, settings |
 | `git/` | `~/.gitconfig` | Git global config |
 | `zsh/` | `~/.zshrc`, `~/.zprofile`, `~/.zshenv` | Zsh shell config |
