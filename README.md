@@ -128,8 +128,8 @@ git push
 
 ### `apple-release/`
 
-Install the macOS preflight with `stow apple-release`. It runs with Python 3
-and uses the selected Xcode for the toolchain check. Use the same
+On macOS, install the iOS release preflight with `stow --no-folding apple-release`.
+It runs with Python 3 and uses the selected Xcode for the toolchain check. Use the same
 `DEVELOPER_DIR` as the archive command when selecting Xcode per release.
 
 Check [Apple’s SDK requirements](https://developer.apple.com/news/upcoming-requirements/)
