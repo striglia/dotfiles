@@ -7,7 +7,16 @@ import plistlib
 import re
 import subprocess
 import sys
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+
+TESTFLIGHT_SDK = "27"
+PREVIOUS_APPLE_MINIMUM_SDK = "26"
+# Apple announced April 2027 without naming a day.
+OVERRIDE_CUTOFF = date(2027, 4, 1)
+OVERRIDE_ENV = "APPLE_TESTFLIGHT_SDK_OVERRIDE_REASON"
 
 
 def version(value):
@@ -43,18 +52,43 @@ def archive_sdk(archive):
     return match.group(1)
 
 
-def main():
+def xcodebuild_args(args):
+    if "-exportArchive" in args:
+        if args.count("-archivePath") != 1:
+            raise ValueError("expected exactly one -archivePath for xcodebuild export")
+        path_index = args.index("-archivePath") + 1
+        if path_index == len(args) or not args[path_index] or args[path_index].startswith("-"):
+            raise ValueError("missing -archivePath value for xcodebuild export")
+        return ["--archive", args[path_index]]
+    if "archive" in args:
+        return []
+    return None
+
+
+def main(argv=None, *, today=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["--xcodebuild"]:
+        try:
+            argv = xcodebuild_args(argv[1:])
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+        if argv is None:
+            return 0
+
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--minimum-sdk", required=True, help="Apple's enforced iOS SDK floor")
+    parser.add_argument("--minimum-sdk", help="Require an additional iOS SDK minimum")
     parser.add_argument("--upcoming-sdk", help="A future iOS SDK floor Apple has announced")
     parser.add_argument("--effective", help="Apple's announced date for the upcoming floor")
     parser.add_argument("--archive", type=Path, help="Inspect this .xcarchive instead of the selected Xcode")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if bool(args.upcoming_sdk) != bool(args.effective):
         parser.error("--upcoming-sdk and --effective must be supplied together")
 
     try:
-        minimum = version(args.minimum_sdk)
+        apple_minimum = version(PREVIOUS_APPLE_MINIMUM_SDK)
+        release_minimum = version(TESTFLIGHT_SDK)
+        additional_minimum = version(args.minimum_sdk) if args.minimum_sdk else apple_minimum
         upcoming = version(args.upcoming_sdk) if args.upcoming_sdk else None
         sdk = archive_sdk(args.archive) if args.archive else toolchain_sdk()
         sdk_version = version(sdk)
@@ -67,12 +101,27 @@ def main():
 
     source = "Archive" if args.archive else "Selected Xcode"
     print(f"{source} iPhoneOS SDK {sdk}", flush=True)
-    if sdk_version < minimum:
-        print(f"error: SDK {sdk} is below Apple's enforced iOS SDK floor {args.minimum_sdk}.", file=sys.stderr)
+    if sdk_version < max(apple_minimum, additional_minimum):
+        minimum = args.minimum_sdk if additional_minimum > apple_minimum else PREVIOUS_APPLE_MINIMUM_SDK
+        print(f"error: SDK {sdk} is below the required iOS SDK floor {minimum}.", file=sys.stderr)
         return 1
+    if sdk_version < release_minimum:
+        today = today or datetime.now(ZoneInfo("America/Los_Angeles")).date()
+        reason = os.environ.get(OVERRIDE_ENV, "").strip()
+        if today >= OVERRIDE_CUTOFF:
+            print(f"error: TestFlight requires iOS SDK {TESTFLIGHT_SDK}. "
+                  f"The temporary override expired on {OVERRIDE_CUTOFF}.", file=sys.stderr)
+            return 1
+        if not reason:
+            print(f"error: TestFlight requires iOS SDK {TESTFLIGHT_SDK}. "
+                  f"For a one-off release before {OVERRIDE_CUTOFF}, set {OVERRIDE_ENV} "
+                  "to the reason on that release invocation.", file=sys.stderr)
+            return 1
+        print(f"warning: one-off TestFlight SDK override before {OVERRIDE_CUTOFF}: "
+              f"SDK {sdk}, reason {reason!r}", file=sys.stderr)
     if upcoming is not None and sdk_version < upcoming:
-        print(f"warning: Apple announced iOS SDK {args.upcoming_sdk} starting {args.effective}. "
-              f"This release meets the current floor of {args.minimum_sdk}.", file=sys.stderr)
+        print(f"warning: Apple announced iOS SDK {args.upcoming_sdk} starting {args.effective}.",
+              file=sys.stderr)
     return 0
 
 
